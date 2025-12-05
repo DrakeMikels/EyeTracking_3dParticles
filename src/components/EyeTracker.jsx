@@ -7,6 +7,7 @@ export default function EyeTracker() {
   const { setGestureState } = useGesture();
   const faceLandmarkerRef = useRef(null);
   const requestRef = useRef(null);
+  const [status, setStatus] = React.useState("INITIALIZING"); // Add UI status
 
   useEffect(() => {
     let active = true;
@@ -22,16 +23,18 @@ export default function EyeTracker() {
         faceLandmarkerRef.current = await FaceLandmarker.createFromOptions(vision, {
           baseOptions: {
             modelAssetPath: `https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task`,
-            delegate: "GPU"
+            // delegate: "GPU" // Removed GPU delegate for maximum mobile compatibility
           },
           outputFaceBlendshapes: true,
           runningMode: "VIDEO",
           numFaces: 1
         });
 
+        setStatus("MODEL READY");
         startWebcam();
       } catch (error) {
         console.error("Error initializing Face Mesh:", error);
+        setStatus("ERROR: MODEL");
       }
     };
 
@@ -49,16 +52,27 @@ export default function EyeTracker() {
 
   const startWebcam = async () => {
     try {
+      // Constraints: Ideal 640x480, but accept whatever mobile gives
       const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { width: 640, height: 480, facingMode: "user" } 
+        video: { 
+            width: { ideal: 640 }, 
+            height: { ideal: 480 }, 
+            facingMode: "user" 
+        } 
       });
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.onloadeddata = predictWebcam;
+        // Explicit play for iOS compatibility
+        videoRef.current.onloadeddata = () => {
+            videoRef.current.play().catch(e => console.error("Play failed", e));
+            setStatus("TRACKING");
+            predictWebcam();
+        };
       }
     } catch (err) {
       console.error("Error accessing webcam:", err);
+      setStatus("ERROR: CAM");
     }
   };
 
@@ -165,7 +179,7 @@ export default function EyeTracker() {
        />
        {/* Debug Overlay */}
        <div className="absolute bottom-1 left-2 text-[8px] sm:text-[10px] text-white/70 font-mono">
-         EYE TRACKING
+         {status}
        </div>
     </div>
   );
