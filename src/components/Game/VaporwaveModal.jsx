@@ -11,6 +11,9 @@ export default function VaporwaveModal() {
 
     // Only show modal if in game mode AND state is intro or gameover
     if (currentShape !== 'game') return null;
+    
+    // IMPORTANT: The modal should be visible when gameMode is 'intro' or 'gameover'.
+    // It should only be hidden when 'playing'.
     if (gameState.gameMode === 'playing') return null;
 
     const startGame = () => {
@@ -25,7 +28,7 @@ export default function VaporwaveModal() {
     };
 
     return (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 pointer-events-auto">
             <div className="relative w-full max-w-lg overflow-hidden rounded-xl border-2 border-[#ff00ff] bg-[#050510] shadow-[0_0_40px_rgba(255,0,255,0.3)] p-1">
                 
                 {/* Scanlines Effect */}
