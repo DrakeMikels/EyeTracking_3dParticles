@@ -91,15 +91,8 @@ export default function EyeTracker() {
 
   const predictionLoopRef = useRef(null);
   const detectionStartTime = useRef(null);
+  const lastFaceDetectedTime = useRef(0);
   const ACTIVATION_DELAY = 500; // 500ms delay before activating
-
-  // ... (in useEffect)
-    return () => {
-      active = false;
-      if (requestRef.current) cancelAnimationFrame(requestRef.current);
-      // ...
-    };
-  // ...
 
   const predictWebcam = () => {
     const landmarker = faceLandmarkerRef.current;
@@ -111,7 +104,9 @@ export default function EyeTracker() {
           const results = landmarker.detectForVideo(video, startTimeMs);
 
           if (results.faceBlendshapes && results.faceBlendshapes.length > 0) {
-            // Face Detected
+            // FACE DETECTED
+            lastFaceDetectedTime.current = performance.now();
+            
             if (!detectionStartTime.current) {
                 detectionStartTime.current = performance.now();
                 setStatus("ACQUIRING...");
@@ -134,6 +129,7 @@ export default function EyeTracker() {
                 tension = Math.max(0, Math.min(1, tension));
 
                 // --- Gaze / Head Position Detection ---
+                // Hybrid Approach: Head Position + Eye Blendshapes
                 if (results.faceLandmarks && results.faceLandmarks.length > 0) {
                     const landmarks = results.faceLandmarks[0];
                     
@@ -142,25 +138,30 @@ export default function EyeTracker() {
                     const headX = (0.5 - noseTip.x) * 1.8; 
                     const headY = (0.5 - noseTip.y) * 1.8;
 
-                    // 2. Eye Gaze from Blendshapes
+                    // 2. Eye Gaze from Blendshapes (Independent of head movement)
+                    // Left Eye
                     const eyeLookInLeft = blendshapes.find(s => s.categoryName === 'eyeLookInLeft')?.score || 0;
                     const eyeLookOutLeft = blendshapes.find(s => s.categoryName === 'eyeLookOutLeft')?.score || 0;
                     const eyeLookUpLeft = blendshapes.find(s => s.categoryName === 'eyeLookUpLeft')?.score || 0;
                     const eyeLookDownLeft = blendshapes.find(s => s.categoryName === 'eyeLookDownLeft')?.score || 0;
                     
+                    // Right Eye
                     const eyeLookInRight = blendshapes.find(s => s.categoryName === 'eyeLookInRight')?.score || 0;
                     const eyeLookOutRight = blendshapes.find(s => s.categoryName === 'eyeLookOutRight')?.score || 0;
                     const eyeLookUpRight = blendshapes.find(s => s.categoryName === 'eyeLookUpRight')?.score || 0;
                     const eyeLookDownRight = blendshapes.find(s => s.categoryName === 'eyeLookDownRight')?.score || 0;
 
+                    // Calculate Gaze Vectors
                     const lookLeftScore = eyeLookOutLeft + eyeLookInRight;
                     const lookRightScore = eyeLookInLeft + eyeLookOutRight;
                     const lookUpScore = eyeLookUpLeft + eyeLookUpRight;
                     const lookDownScore = eyeLookDownLeft + eyeLookDownRight;
 
+                    // Net Gaze Delta (-1 to 1 range approx)
                     const gazeX = (lookRightScore - lookLeftScore) * 1.0; 
                     const gazeY = (lookUpScore - lookDownScore) * 1.0;
 
+                    // Combine Head + Gaze
                     let totalX = headX + gazeX;
                     let totalY = headY + gazeY;
 
@@ -181,22 +182,23 @@ export default function EyeTracker() {
                 }
             } else {
                 // Waiting for delay - keep cursor centered but don't update isHandDetected to true yet
-                // This effectively keeps it "Idle" but allows the system to know we see a face
-                // No operation needed here, existing state persists (which is idle/center)
             }
           } else {
-             // No face detected - Reset
-             detectionStartTime.current = null;
-             if (status === "TRACKING" || status === "ACQUIRING...") {
-                 setStatus("SEARCHING...");
+             // NO FACE DETECTED
+             // Only reset if we haven't seen face for > 200ms (anti-flicker)
+             if (performance.now() - lastFaceDetectedTime.current > 200) {
+                 detectionStartTime.current = null;
+                 if (status === "TRACKING" || status === "ACQUIRING...") {
+                     setStatus("SEARCHING...");
+                 }
+                 
+                 setGestureState(prev => ({ 
+                     ...prev, 
+                     isHandDetected: false,
+                     tension: 0,
+                     position: { x: 0, y: 0 } // Lock to center on idle
+                 }));
              }
-             
-             setGestureState(prev => ({ 
-                 ...prev, 
-                 isHandDetected: false,
-                 tension: 0,
-                 position: { x: 0, y: 0 } // Lock to center on idle
-             }));
           }
       } catch (e) {
           console.error("Detection error:", e);
