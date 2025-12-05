@@ -173,7 +173,7 @@ export default function Overlay() {
                                 <span className="text-[11px] font-semibold text-white/50 uppercase tracking-widest">Colors</span>
                             </div>
                             
-                            <div className="grid grid-cols-4 gap-3">
+                            <div className="grid grid-cols-5 gap-3">
                                 {COLORS.map((color) => {
                                     const isSelected = particleColor === color.hex;
                                     return (
@@ -181,34 +181,27 @@ export default function Overlay() {
                                             key={color.hex}
                                             onClick={() => setParticleColor(color.hex)}
                                             className={cn(
-                                                "aspect-square rounded-full transition-all duration-500 relative group",
-                                                isSelected ? "scale-100" : "scale-90 opacity-60 hover:opacity-100 hover:scale-95"
+                                                "aspect-square rounded-full transition-all duration-300 relative group",
+                                                isSelected ? "scale-110" : "hover:scale-105"
                                             )}
                                         >
                                             <div 
-                                                className="absolute inset-0 rounded-full border border-white/10 bg-[#0a0a0a] flex items-center justify-center overflow-hidden"
-                                            >
-                                                <div 
-                                                    className="w-4 h-4 rounded-full shadow-sm transition-all duration-500"
-                                                    style={{ 
-                                                        backgroundColor: color.hex,
-                                                        boxShadow: isSelected ? `0 0 15px ${color.hex}` : 'none',
-                                                        transform: isSelected ? 'scale(1.2)' : 'scale(1)'
-                                                    }}
-                                                />
-                                            </div>
-                                            {isSelected && (
-                                                <div className="absolute inset-0 rounded-full border border-white/20 ring-1 ring-white/10" />
-                                            )}
+                                                className={cn(
+                                                    "absolute inset-0 rounded-full shadow-lg transition-all duration-300 border border-white/10",
+                                                    isSelected ? "opacity-100 ring-2 ring-white ring-offset-2 ring-offset-black" : "opacity-80 group-hover:opacity-100"
+                                                )}
+                                                style={{ 
+                                                    backgroundColor: color.hex,
+                                                    boxShadow: `0 0 15px ${color.hex}40`
+                                                }}
+                                            />
                                         </button>
                                     );
                                 })}
 
                                 {/* Custom Color */}
-                                <div className="relative aspect-square rounded-full overflow-hidden group transition-transform hover:scale-95 scale-90 opacity-60 hover:opacity-100">
-                                    <div className="absolute inset-0 bg-[#0a0a0a] border border-white/10 rounded-full flex items-center justify-center">
-                                        <div className="w-4 h-4 rounded-full bg-gradient-to-tr from-red-500 via-green-500 to-blue-500 opacity-80" />
-                                    </div>
+                                <div className="relative aspect-square rounded-full overflow-hidden group transition-transform hover:scale-105 cursor-pointer">
+                                    <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-red-500 via-green-500 to-blue-500 border border-white/10 opacity-80 group-hover:opacity-100 transition-opacity" />
                                     <input
                                         type="color"
                                         value={particleColor}
