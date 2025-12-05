@@ -44,9 +44,10 @@ export function getEyePoints(count) {
         const theta = Math.random() * 2 * Math.PI;
         
         // Position them slightly in front of sphere surface to pop
+        // Center on Z axis, no rotation yet
         positions[i * 3] = r * Math.cos(theta);
         positions[i * 3 + 1] = r * Math.sin(theta);
-        positions[i * 3 + 2] = 2.2; // Push forward Z
+        positions[i * 3 + 2] = 2.2; // Push forward Z (front of sphere)
     }
 
     return positions;

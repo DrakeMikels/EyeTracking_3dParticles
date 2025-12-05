@@ -155,14 +155,12 @@ export default function ParticleSystem() {
 
                 if (i >= irisStartIndex) {
                     // This is the Iris/Pupil
-                    // We want to move them towards the gaze position (relative to sphere center)
-                    // Just sliding them on X/Y is simplest effect
-                    
                     // Scale pupil
                     tx *= pupilScale;
                     ty *= pupilScale;
                     
                     // Gaze tracking: Move pupil towards gesture position
+                    // We want standard XY movement
                     const gazeX = position.x * 1.5; 
                     const gazeY = position.y * 1.5;
                     
@@ -178,6 +176,21 @@ export default function ParticleSystem() {
                 positions[iy] = THREE.MathUtils.lerp(positions[iy], ty, lerpSpeed);
                 positions[iz] = THREE.MathUtils.lerp(positions[iz], tz, lerpSpeed);
             }
+            
+            // If it's the Eye, ensure we don't apply additional global rotation that confuses the gaze
+            // We already set rotation to 0 in the else block above if shape is 'game', 
+            // but for 'eye' we might want head rotation to tilt the whole eyeball, 
+            // while the pupil slides locally.
+            // Current rotation logic:
+            // rotX = -position.y * 2; rotY = position.x * 2;
+            // This rotates the whole sphere.
+            // If I look Left (pos.x < 0), rotY becomes negative.
+            // Sphere rotates Y- (Left). 
+            // Pupil slides Left. 
+            // Result: Pupil moves double speed or cancels out?
+            // Let's damp the global rotation for the eye so the pupil movement is more prominent.
+            pointsRef.current.rotation.y = THREE.MathUtils.lerp(pointsRef.current.rotation.y, position.x * 0.5, 0.1);
+            pointsRef.current.rotation.x = THREE.MathUtils.lerp(pointsRef.current.rotation.x, -position.y * 0.5, 0.1);
 
         } else if (currentShape === 'neural') {
             // NEURAL ANIMATION LOGIC
@@ -238,6 +251,14 @@ export default function ParticleSystem() {
                     tz += (Math.random() - 0.5) * delta * speed;
                 }
 
+                // Special coloring for Eye shape
+                // We need to override the global particle color for the Iris part
+                // Note: pointsMaterial color is global. We can't easily change color per particle without a shader material or vertex colors.
+                // However, we CAN cheat by simply making the iris particles extremely dense/bright or moving them.
+                // But user asked for different color. 
+                // Switching to Vertex Colors is significant.
+                // Alternative: If Squinting (tension > 0.5), maybe pulse the global color?
+                
                 // Interpolate current position to target
                 // Speed varies by shape?
                 const lerpSpeed = 0.05; // Smooth transition
@@ -263,7 +284,7 @@ export default function ParticleSystem() {
             </bufferGeometry>
             <pointsMaterial
                 size={0.015}
-                color={particleColor}
+                color={currentShape === 'eye' && gestureState.tension > 0.5 ? "#ff0000" : particleColor} // Dynamic color for Eye
                 sizeAttenuation={true}
                 depthWrite={false}
                 blending={THREE.AdditiveBlending}
