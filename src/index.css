@@ -1,13 +1,15 @@
 
+@import "tailwindcss";
+
 @import "tw-animate-css";
 
 @plugin "tailwindcss-animate";
 
 @custom-variant dark (&:is(.dark *));
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@theme {
+  --font-sans: "Inter", sans-serif;
+}
 
 html, body, #root {
   width: 100%;
