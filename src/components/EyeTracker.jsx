@@ -128,6 +128,15 @@ export default function EyeTracker() {
             let totalX = headX + gazeX;
             let totalY = headY + gazeY;
 
+            // --- Mobile Correction ---
+            // On mobile (portrait), the x/y scaling might be off due to aspect ratio.
+            // If width < height, X axis movement needs to be amplified to reach edges.
+            // We can check window.innerWidth/Height
+            if (window.innerWidth < window.innerHeight) {
+                const aspectRatio = window.innerHeight / window.innerWidth;
+                totalX *= aspectRatio * 1.2; // Boost X on portrait to reach edges
+            }
+
             setGestureState({
                 isHandDetected: true, 
                 tension: tension,
