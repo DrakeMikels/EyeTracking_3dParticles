@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useGesture } from '../../context/GestureContext';
-import { Heart, Flower, Globe, Zap, User, Sparkles, Hand, Move, Maximize2, PanelLeftClose, PanelLeft } from 'lucide-react';
+import { Heart, Flower, Globe, Zap, User, Sparkles, Hand, Move, Maximize2, PanelLeftClose, PanelLeft, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
@@ -13,6 +13,7 @@ const SHAPES = [
     { id: 'saturn', icon: Zap, label: 'Saturn' },
     { id: 'buddha', icon: User, label: 'Buddha' },
     { id: 'fireworks', icon: Sparkles, label: 'Fireworks' },
+    { id: 'game', icon: Play, label: 'Game' },
 ];
 
 const COLORS = [
@@ -144,6 +145,8 @@ export default function Overlay() {
                                 {SHAPES.map((shape) => {
                                     const Icon = shape.icon;
                                     const isActive = currentShape === shape.id;
+                                    const isGame = shape.id === 'game';
+                                    
                                     return (
                                         <ToggleGroupItem
                                             key={shape.id}
@@ -153,13 +156,22 @@ export default function Overlay() {
                                                 "flex-grow basis-[30%] h-14 rounded-xl border transition-all duration-500 relative overflow-hidden group",
                                                 isActive 
                                                     ? "bg-white/[0.03] border-cyan-500/30 text-cyan-50 shadow-[0_0_20px_rgba(0,200,255,0.15)]" 
-                                                    : "bg-[#0a0a0a] border-white/5 text-white/30 hover:border-white/10 hover:text-white/60"
+                                                    : "bg-[#0a0a0a] border-white/5 text-white/30 hover:border-white/10 hover:text-white/60",
+                                                isGame && isActive && "border-purple-500/50 shadow-[0_0_30px_rgba(255,0,255,0.3)] bg-purple-900/10",
+                                                isGame && !isActive && "hover:border-purple-500/30 hover:text-purple-300 hover:shadow-[0_0_15px_rgba(255,0,255,0.15)]"
                                             )}
                                         >
-                                            {isActive && <div className="absolute inset-0 bg-cyan-500/10 blur-md" />}
+                                            {isActive && <div className={cn("absolute inset-0 blur-md", isGame ? "bg-purple-500/20" : "bg-cyan-500/10")} />}
+                                            {isGame && (
+                                                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                            )}
                                             <div className="relative z-10 flex flex-col items-center justify-center gap-1">
-                                                <Icon className={cn("h-4 w-4 transition-transform duration-500", isActive && "scale-110 text-cyan-300 drop-shadow-[0_0_8px_rgba(103,232,249,0.5)]")} />
-                                                <span className="text-[9px] font-medium tracking-wider uppercase">{shape.label}</span>
+                                                <Icon className={cn(
+                                                    "h-4 w-4 transition-transform duration-500", 
+                                                    isActive && "scale-110 drop-shadow-[0_0_8px_rgba(103,232,249,0.5)]",
+                                                    isActive && isGame ? "text-purple-300 drop-shadow-[0_0_10px_rgba(255,0,255,0.8)]" : isActive ? "text-cyan-300" : ""
+                                                )} />
+                                                <span className={cn("text-[9px] font-medium tracking-wider uppercase", isGame && isActive && "text-purple-200 shadow-purple-500")}>{shape.label}</span>
                                             </div>
                                         </ToggleGroupItem>
                                     );
