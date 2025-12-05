@@ -87,18 +87,37 @@ export default function EyeTracker() {
         const tension = blinkScore > 0.4 ? 1.0 : 0.0;
 
         // --- Gaze / Head Position Detection ---
-        // Using face transformation matrix is complex, simpler approach:
-        // Use nose tip position normalized.
-        // Landmark 1 is usually nose tip in 468 point mesh.
+        // Originally used nose tip (landmark 1).
+        // NOW utilizing Iris tracking for better responsiveness to eye movement.
+        // Left Iris Center: 468, Right Iris Center: 473
+        // Note: The standard face mesh model includes 478 landmarks (468 face + 10 iris)
         if (results.faceLandmarks && results.faceLandmarks.length > 0) {
-            const noseTip = results.faceLandmarks[0][1];
+            const landmarks = results.faceLandmarks[0];
             
-            // MediaPipe Coords: x (0-1), y (0-1), z (depth)
-            // Center is 0.5, 0.5
-            // Map to -1 to 1 range
-            // Invert X for mirroring effect
-            const x = (0.5 - noseTip.x) * 3.0; // Multiplier for sensitivity
-            const y = (0.5 - noseTip.y) * 3.0;
+            // Check if iris landmarks exist (indices 468+)
+            // If not, fallback to nose tip (1)
+            let x, y;
+
+            if (landmarks.length > 470) {
+                 const leftIris = landmarks[468];
+                 const rightIris = landmarks[473];
+                 
+                 // Average position of both irises
+                 const avgX = (leftIris.x + rightIris.x) / 2;
+                 const avgY = (leftIris.y + rightIris.y) / 2;
+                 
+                 // Center is 0.5, 0.5
+                 // Map to -1 to 1 range
+                 // Invert X for mirroring effect
+                 // Increased sensitivity (multiplier) from 3.0 to 5.0 as requested
+                 x = (0.5 - avgX) * 5.0; 
+                 y = (0.5 - avgY) * 5.0;
+            } else {
+                 // Fallback to nose tip
+                 const noseTip = landmarks[1];
+                 x = (0.5 - noseTip.x) * 4.0;
+                 y = (0.5 - noseTip.y) * 4.0;
+            }
             
             setGestureState({
                 isHandDetected: true, // Reusing this flag for "Face Detected"
