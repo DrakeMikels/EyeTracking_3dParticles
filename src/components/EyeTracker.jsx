@@ -73,18 +73,19 @@ export default function EyeTracker() {
       if (results.faceBlendshapes && results.faceBlendshapes.length > 0) {
         const blendshapes = results.faceBlendshapes[0].categories;
         
-        // --- Blink Detection ---
+        // --- Blink / Squint Detection ---
         // Indices for blink: eyeBlinkLeft (9), eyeBlinkRight (10)
-        // Usually these are named explicitly in the category objects
         const eyeBlinkLeft = blendshapes.find(shape => shape.categoryName === 'eyeBlinkLeft');
         const eyeBlinkRight = blendshapes.find(shape => shape.categoryName === 'eyeBlinkRight');
         
         const blinkScore = (eyeBlinkLeft?.score + eyeBlinkRight?.score) / 2 || 0;
         
-        // Blink > 0.5 is considered closed eyes (equivalent to closed fist)
-        // We map "closed eyes" to High Tension (1.0) and "open eyes" to Low Tension (0.0)
-        // Smooth it a bit? For game mechanics, direct mapping is usually snappier.
-        const tension = blinkScore > 0.4 ? 1.0 : 0.0;
+        // Map Squint/Blink to Tension continuously
+        // Threshold: 0.05 (ignore micro-jitters)
+        // Max: 0.7 (fully closed doesn't always reach 1.0 with some webcams)
+        // Formula maps range [0.05, 0.7] to [0, 1]
+        let tension = (blinkScore - 0.05) * 1.5;
+        tension = Math.max(0, Math.min(1, tension));
 
         // --- Gaze / Head Position Detection ---
         // Hybrid Approach: Head Position + Eye Blendshapes
@@ -94,8 +95,9 @@ export default function EyeTracker() {
             // 1. Head Position (Nose Tip)
             const noseTip = landmarks[1];
             // Normalize to -1 to 1 (inverted X for mirror)
-            const headX = (0.5 - noseTip.x) * 2.5; 
-            const headY = (0.5 - noseTip.y) * 2.5;
+            // Reduced sensitivity from 2.5 to 1.8 for smoother control
+            const headX = (0.5 - noseTip.x) * 1.8; 
+            const headY = (0.5 - noseTip.y) * 1.8;
 
             // 2. Eye Gaze from Blendshapes (Independent of head movement)
             // Left Eye
@@ -111,49 +113,20 @@ export default function EyeTracker() {
             const eyeLookDownRight = blendshapes.find(s => s.categoryName === 'eyeLookDownRight')?.score || 0;
 
             // Calculate Gaze Vectors
-            // Horizontal: OutLeft + InRight means looking Left (user's left)
-            // We mirror X, so looking Left should move cursor Left (negative X in our gesture space? No, mapped X is -1 to 1)
-            // Let's refine the mapping:
-            // "Look Left" (User's Left) -> eyeLookOutLeft + eyeLookInRight
-            // "Look Right" (User's Right) -> eyeLookInLeft + eyeLookOutRight
-            
             const lookLeftScore = eyeLookOutLeft + eyeLookInRight;
             const lookRightScore = eyeLookInLeft + eyeLookOutRight;
             const lookUpScore = eyeLookUpLeft + eyeLookUpRight;
             const lookDownScore = eyeLookDownLeft + eyeLookDownRight;
 
             // Net Gaze Delta (-1 to 1 range approx)
-            // If I look Left, lookLeftScore is high.
-            // Since we use mirrored video (scale-x-[-1]), Looking Left (User Left) appears on the Right side of screen?
-            // Wait, logic:
-            // User looks to their physical Left. 
-            // Cursor should go Left.
-            // In typical mirrored cam: Moving head Left moves image Right.
-            // Our headX calc: (0.5 - noseTip.x). If nose moves Left (x < 0.5), value is positive? 
-            // Let's stick to standard "Look Left -> Negative X" convention or whatever HeadX uses.
-            // (0.5 - x): If x is 0 (Left edge of image), result is 0.5 (Positive).
-            // Usually MediaPipe x=0 is User's Right (in mirrored view)? No, x=0 is Left of Image.
-            // If mirrored: User Left = Image Right (x=1). 
-            // If User moves Left, x increases. (0.5 - x) becomes negative.
-            // So Head Left -> Negative X.
-            
-            // Now Gaze:
-            // Look Left -> lookLeftScore high.
-            // We want this to contribute to Negative X.
-            // So: gazeX = lookRightScore - lookLeftScore.
-            // If Look Left: (0 - 1) = -1. Correct.
-            
-            const gazeX = (lookRightScore - lookLeftScore) * 1.5; // Sensitivity
-            const gazeY = (lookUpScore - lookDownScore) * 1.5;
+            // Reduced sensitivity from 1.5 to 1.0 for finer precision
+            const gazeX = (lookRightScore - lookLeftScore) * 1.0; 
+            const gazeY = (lookUpScore - lookDownScore) * 1.0;
 
             // Combine Head + Gaze
             // Head provides base "center", Gaze provides fine offset.
             let totalX = headX + gazeX;
-            let totalY = headY + gazeY; // Y might need inversion?
-            // MediaPipe Y=0 is Top. (0.5 - y) -> Top is Positive. 
-            // Blendshape Up -> lookUpScore high.
-            // gazeY = Up - Down = Positive. 
-            // So Up -> Positive. Matches.
+            let totalY = headY + gazeY;
 
             setGestureState({
                 isHandDetected: true, 
