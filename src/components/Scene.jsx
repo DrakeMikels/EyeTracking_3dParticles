@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, Environment } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import ParticleSystem from './ParticleSystem';
 import Earth from './Earth';
@@ -14,6 +14,9 @@ function SceneContent() {
 
     return (
         <>
+            {/* Global Environment for Reflections (Critical for Crystal & Ferrofluid) */}
+            <Environment preset="warehouse" background={false} />
+
             {currentShape === 'earth' ? <Earth /> : 
              currentShape === 'crystal' ? <CyberCrystal /> : 
              currentShape === 'ferrofluid' ? <Ferrofluid /> :
@@ -25,14 +28,15 @@ function SceneContent() {
                 <Bloom
                     luminanceThreshold={0.8}
                     luminanceSmoothing={0.1}
-                    intensity={0.3}
-                    radius={0.1}
+                    intensity={0.4}
+                    radius={0.2}
                 />
             </EffectComposer>
 
             {/* Lighting for Earth and Game */}
-            <ambientLight intensity={0.1} />
+            <ambientLight intensity={0.2} />
             <directionalLight position={[5, 3, 5]} intensity={1.5} />
+            <pointLight position={[-5, -3, -5]} intensity={0.5} color="#0040ff" />
         </>
     );
 }
@@ -46,7 +50,8 @@ export default function Scene() {
                 gl={{
                     antialias: true,
                     alpha: false,
-                    powerPreference: 'high-performance'
+                    powerPreference: 'high-performance',
+                    toneMapping: 3 // ACESFilmicToneMapping for better HDR
                 }}
             >
                 <color attach="background" args={['#000005']} />
