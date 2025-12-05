@@ -4,6 +4,7 @@ import { OrbitControls } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import ParticleSystem from './ParticleSystem';
 import Earth from './Earth';
+import GameManager from './Game/GameManager';
 import { useGesture } from '../context/GestureContext';
 
 function SceneContent() {
@@ -12,6 +13,8 @@ function SceneContent() {
     return (
         <>
             {currentShape === 'earth' ? <Earth /> : <ParticleSystem />}
+            
+            {currentShape === 'game' && <GameManager />}
 
             <EffectComposer>
                 <Bloom
@@ -22,7 +25,7 @@ function SceneContent() {
                 />
             </EffectComposer>
 
-            {/* Lighting for Earth */}
+            {/* Lighting for Earth and Game */}
             <ambientLight intensity={0.1} />
             <directionalLight position={[5, 3, 5]} intensity={1.5} />
         </>
