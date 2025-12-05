@@ -137,11 +137,7 @@ export default function ParticleSystem() {
 
         } else if (currentShape === 'eye') {
             // EYE ANIMATION LOGIC
-            // Pupil/Iris parts (last 20% of array) should track gaze slightly more aggressively or constrict on tension
             const irisStartIndex = Math.floor(count * 0.8); 
-            
-            // Dilation/Constriction based on tension (squinting = constrict)
-            // Normal radius ~0.8. Constricted ~0.3.
             const pupilScale = THREE.MathUtils.lerp(1.0, 0.4, tension);
 
             for (let i = 0; i < count; i++) {
@@ -155,19 +151,19 @@ export default function ParticleSystem() {
 
                 if (i >= irisStartIndex) {
                     // This is the Iris/Pupil
-                    // Scale pupil
                     tx *= pupilScale;
                     ty *= pupilScale;
                     
                     // Gaze tracking: Move pupil towards gesture position
-                    // We want standard XY movement
+                    // In Three.js default camera, +Y is UP, +X is RIGHT.
+                    // gestureState.position is -1 (left/bottom) to 1 (right/top)
+                    // So gazeX needs to match coordinate system.
                     const gazeX = position.x * 1.5; 
                     const gazeY = position.y * 1.5;
                     
                     tx += gazeX;
                     ty += gazeY;
                     
-                    // Push forward slightly when focused
                     tz += 0.2 + tension * 0.5;
                 }
 
@@ -177,20 +173,13 @@ export default function ParticleSystem() {
                 positions[iz] = THREE.MathUtils.lerp(positions[iz], tz, lerpSpeed);
             }
             
-            // If it's the Eye, ensure we don't apply additional global rotation that confuses the gaze
-            // We already set rotation to 0 in the else block above if shape is 'game', 
-            // but for 'eye' we might want head rotation to tilt the whole eyeball, 
-            // while the pupil slides locally.
-            // Current rotation logic:
-            // rotX = -position.y * 2; rotY = position.x * 2;
-            // This rotates the whole sphere.
-            // If I look Left (pos.x < 0), rotY becomes negative.
-            // Sphere rotates Y- (Left). 
-            // Pupil slides Left. 
-            // Result: Pupil moves double speed or cancels out?
-            // Let's damp the global rotation for the eye so the pupil movement is more prominent.
-            pointsRef.current.rotation.y = THREE.MathUtils.lerp(pointsRef.current.rotation.y, position.x * 0.5, 0.1);
-            pointsRef.current.rotation.x = THREE.MathUtils.lerp(pointsRef.current.rotation.x, -position.y * 0.5, 0.1);
+            // Correct global rotation: 
+            // Ensure "Center" gaze actually points the eye at the camera (0,0,0 rotation).
+            // We dampen rotation so the eye doesn't spin away from the user.
+            // Subtle tilt based on gaze.
+            pointsRef.current.rotation.y = THREE.MathUtils.lerp(pointsRef.current.rotation.y, position.x * 0.2, 0.1);
+            pointsRef.current.rotation.x = THREE.MathUtils.lerp(pointsRef.current.rotation.x, -position.y * 0.2, 0.1);
+            pointsRef.current.rotation.z = 0; // Ensure no roll
 
         } else if (currentShape === 'neural') {
             // NEURAL ANIMATION LOGIC

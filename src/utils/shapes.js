@@ -39,15 +39,15 @@ export function getEyePoints(count) {
 
     // Iris (Concave disk or smaller sphere section)
     // We'll start them at center-front (z+)
+    // Using Z-axis as "forward" means (0, 0, 2.2) is center front.
     for (let i = scleraCount; i < count; i++) {
         const r = 0.8 * Math.sqrt(Math.random()); // Disk radius
         const theta = Math.random() * 2 * Math.PI;
         
-        // Position them slightly in front of sphere surface to pop
-        // Center on Z axis, no rotation yet
-        positions[i * 3] = r * Math.cos(theta);
-        positions[i * 3 + 1] = r * Math.sin(theta);
-        positions[i * 3 + 2] = 2.2; // Push forward Z (front of sphere)
+        // Flat disk on XY plane, pushed forward on Z
+        positions[i * 3] = r * Math.cos(theta); // X
+        positions[i * 3 + 1] = r * Math.sin(theta); // Y
+        positions[i * 3 + 2] = 2.2; // Z (Forward)
     }
 
     return positions;
