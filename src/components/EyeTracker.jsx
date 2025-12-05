@@ -176,8 +176,6 @@ export default function EyeTracker() {
         }
       } else {
          // No face detected - Reset to Center (Idle)
-         // When transitioning from tracked to lost, smooth reset happens in ParticleSystem via lerp,
-         // but we set the target to 0,0 here.
          setGestureState(prev => ({ 
              ...prev, 
              isHandDetected: false,
