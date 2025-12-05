@@ -66,7 +66,15 @@ export default function EyeTracker() {
         // Use onloadeddata instead of onloadedmetadata for iOS Safari compatibility
         // iOS sometimes fires loadedmetadata before video is actually ready to play
         videoRef.current.onloadeddata = () => {
-            videoRef.current.play().catch(e => console.error("Play error", e));
+            // Ensure play() is called
+            const playPromise = videoRef.current.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(e => {
+                    console.error("Play error", e);
+                    // Auto-play failed, UI might need to ask user to tap
+                    setStatus("TAP TO START");
+                });
+            }
             
             videoRef.current.width = videoRef.current.videoWidth;
             videoRef.current.height = videoRef.current.videoHeight;
@@ -157,19 +165,26 @@ export default function EyeTracker() {
                     totalX *= aspectRatio * 1.2; // Boost X on portrait to reach edges
                 }
 
-                setGestureState({
-                    isHandDetected: true, 
-                    tension: tension,
-                    position: { 
-                        x: Math.max(-1, Math.min(1, totalX)), 
-                        y: Math.max(-1, Math.min(1, totalY)) 
-                    }
-                });
-            }
-          } else {
-             // No face detected
-             setGestureState(prev => ({ ...prev, isHandDetected: false }));
-          }
+            setGestureState({
+                isHandDetected: true, 
+                tension: tension,
+                position: { 
+                    x: Math.max(-1, Math.min(1, totalX)), 
+                    y: Math.max(-1, Math.min(1, totalY)) 
+                }
+            });
+        }
+      } else {
+         // No face detected - Reset to Center (Idle)
+         // When transitioning from tracked to lost, smooth reset happens in ParticleSystem via lerp,
+         // but we set the target to 0,0 here.
+         setGestureState(prev => ({ 
+             ...prev, 
+             isHandDetected: false,
+             tension: 0,
+             position: { x: 0, y: 0 } // Lock to center on idle
+         }));
+      }
       } catch (e) {
           console.error("Detection error:", e);
       }
