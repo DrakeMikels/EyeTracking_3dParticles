@@ -93,10 +93,19 @@ export default function GameManager() {
             // Magnetic attraction (Gravity Well)
             // Stronger when close
             if (dist < 4.0) {
-                const strength = gestureState.tension > 0.5 ? 5.0 : 2.0; // Stronger suck when fist closed
-                target.position[0] += dx * delta * strength;
-                target.position[1] += dy * delta * strength;
-                target.position[2] += dz * delta * strength;
+                let shouldAttract = true;
+                
+                // If it's antimatter, only attract if FIST IS CLOSED (Gravity Well Active)
+                if (target.type === 'antimatter' && gestureState.tension <= 0.5) {
+                    shouldAttract = false;
+                }
+
+                if (shouldAttract) {
+                    const strength = gestureState.tension > 0.5 ? 5.0 : 2.0; // Stronger suck when fist closed
+                    target.position[0] += dx * delta * strength;
+                    target.position[1] += dy * delta * strength;
+                    target.position[2] += dz * delta * strength;
+                }
             }
 
             // Collision
