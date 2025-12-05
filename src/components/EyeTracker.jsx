@@ -180,8 +180,9 @@ export default function EyeTracker() {
                     });
                 }
             } else {
-                // Waiting for delay, keep previous state (likely idle)
-                // No update to GestureState, just visual status
+                // Waiting for delay - keep cursor centered but don't update isHandDetected to true yet
+                // This effectively keeps it "Idle" but allows the system to know we see a face
+                // No operation needed here, existing state persists (which is idle/center)
             }
           } else {
              // No face detected - Reset
