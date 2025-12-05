@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useGesture } from '../../context/GestureContext';
 import * as THREE from 'three';
-import { Text, Stars, Sparkles } from '@react-three/drei';
+import { Text, Stars, Sparkles, MeshDistortMaterial } from '@react-three/drei';
 
 // Bounds for spawning - keep it tighter to screen
 const SPAWN_RATE = 30; // Faster spawns
@@ -52,7 +52,7 @@ export default function GameManager() {
                 ],
                 type: isAntimatter ? 'antimatter' : 'gold',
                 active: true,
-                scale: 0
+                scale: 1 // Initial scale
             };
             
             setTargets(prev => [...prev, newTarget]);
@@ -81,9 +81,6 @@ export default function GameManager() {
                  target.active = false; // Missed it
             }
 
-            // Bounce off walls (optional, but let's keep them flowing forward)
-            // if (Math.abs(target.position[0]) > boundsX) target.velocity[0] *= -1;
-
             // Distance to hand
             const dx = handX - target.position[0];
             const dy = handY - target.position[1];
@@ -101,15 +98,28 @@ export default function GameManager() {
                 }
 
                 if (shouldAttract) {
-                    const strength = gestureState.tension > 0.5 ? 5.0 : 2.0; // Stronger suck when fist closed
-                    target.position[0] += dx * delta * strength;
-                    target.position[1] += dy * delta * strength;
-                    target.position[2] += dz * delta * strength;
+                    // Exponential gravity: stronger as it gets closer
+                    const baseStrength = gestureState.tension > 0.5 ? 8.0 : 3.0; 
+                    const gravity = baseStrength / (dist + 0.5); // Prevent infinity
+                    
+                    target.position[0] += dx * delta * gravity;
+                    target.position[1] += dy * delta * gravity;
+                    target.position[2] += dz * delta * gravity;
+                    
+                    // SUCK EFFECT: If very close, pull aggressively to center to ensure collision
+                    if (dist < 1.0) {
+                        target.position[0] = THREE.MathUtils.lerp(target.position[0], handX, 0.2);
+                        target.position[1] = THREE.MathUtils.lerp(target.position[1], handY, 0.2);
+                        target.position[2] = THREE.MathUtils.lerp(target.position[2], handZ, 0.2);
+                        
+                        // Shrink effect
+                        target.scale = Math.max(0, target.scale - delta * 5);
+                    }
                 }
             }
 
-            // Collision
-            if (dist < COLLECTION_RADIUS) {
+            // Collision - Increase radius slightly for better "feel"
+            if (dist < 0.8) {
                 if (target.type === 'gold') {
                     scoreRef.current += 100;
                     target.active = false;
@@ -157,7 +167,7 @@ export default function GameManager() {
             
             {/* Targets */}
             {targets.map(target => (
-                <Target key={target.id} position={target.position} type={target.type} />
+                <Target key={target.id} position={target.position} type={target.type} scale={target.scale} />
             ))}
 
             {/* HUD */}
@@ -203,7 +213,7 @@ function GridFloor() {
     );
 }
 
-function Target({ position, type }) {
+function Target({ position, type, scale }) {
     const isGold = type === 'gold';
     const color = isGold ? '#ffd700' : '#ff0000';
     const meshRef = useRef();
@@ -212,6 +222,7 @@ function Target({ position, type }) {
         if(meshRef.current) {
             meshRef.current.rotation.x += delta * 2;
             meshRef.current.rotation.y += delta * 3;
+            if (scale !== undefined) meshRef.current.scale.setScalar(scale);
         }
     });
 
@@ -223,16 +234,18 @@ function Target({ position, type }) {
                 ) : (
                     <dodecahedronGeometry args={[0.25, 0]} />
                 )}
-                <meshStandardMaterial 
-                    color={color} 
+                {/* Improved Material for higher quality look */}
+                <MeshDistortMaterial
+                    color={color}
                     emissive={color}
-                    emissiveIntensity={3}
-                    toneMapped={false}
-                    wireframe
+                    emissiveIntensity={2}
+                    roughness={0.1}
+                    metalness={0.8}
+                    distort={0.3} // Wobbly effect
+                    speed={2}
                 />
             </mesh>
-            {isGold && <Sparkles count={5} scale={1} size={2} speed={0.4} opacity={0.5} color="#ffff00" />}
+            {isGold && <Sparkles count={8} scale={1.2} size={3} speed={0.4} opacity={0.8} color="#ffff00" />}
         </group>
     );
 }
-
