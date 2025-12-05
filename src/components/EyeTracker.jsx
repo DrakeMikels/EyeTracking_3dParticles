@@ -89,100 +89,114 @@ export default function EyeTracker() {
     }
   };
 
+  const predictionLoopRef = useRef(null);
+  const detectionStartTime = useRef(null);
+  const ACTIVATION_DELAY = 500; // 500ms delay before activating
+
+  // ... (in useEffect)
+    return () => {
+      active = false;
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+      // ...
+    };
+  // ...
+
   const predictWebcam = () => {
     const landmarker = faceLandmarkerRef.current;
     const video = videoRef.current;
 
-    if (landmarker && video && !video.paused && video.readyState >= 2) { // Check readyState
+    if (landmarker && video && !video.paused && video.readyState >= 2) {
       const startTimeMs = performance.now();
       try {
           const results = landmarker.detectForVideo(video, startTimeMs);
 
           if (results.faceBlendshapes && results.faceBlendshapes.length > 0) {
-            const blendshapes = results.faceBlendshapes[0].categories;
-            
-            // --- Blink / Squint Detection ---
-            // Indices for blink: eyeBlinkLeft (9), eyeBlinkRight (10)
-            const eyeBlinkLeft = blendshapes.find(shape => shape.categoryName === 'eyeBlinkLeft');
-            const eyeBlinkRight = blendshapes.find(shape => shape.categoryName === 'eyeBlinkRight');
-            
-            const blinkScore = (eyeBlinkLeft?.score + eyeBlinkRight?.score) / 2 || 0;
-            
-            // Map Squint/Blink to Tension continuously
-            // Threshold: 0.05 (ignore micro-jitters)
-            // Max: 0.7 (fully closed doesn't always reach 1.0 with some webcams)
-            // Formula maps range [0.05, 0.7] to [0, 1]
-            let tension = (blinkScore - 0.05) * 1.5;
-            tension = Math.max(0, Math.min(1, tension));
+            // Face Detected
+            if (!detectionStartTime.current) {
+                detectionStartTime.current = performance.now();
+                setStatus("ACQUIRING...");
+            }
 
-            // --- Gaze / Head Position Detection ---
-            // Hybrid Approach: Head Position + Eye Blendshapes
-            if (results.faceLandmarks && results.faceLandmarks.length > 0) {
-                const landmarks = results.faceLandmarks[0];
+            const timeSinceDetection = performance.now() - detectionStartTime.current;
+
+            if (timeSinceDetection >= ACTIVATION_DELAY) {
+                setStatus("TRACKING");
+                const blendshapes = results.faceBlendshapes[0].categories;
                 
-                // 1. Head Position (Nose Tip)
-                const noseTip = landmarks[1];
-                // Normalize to -1 to 1 (inverted X for mirror)
-                // Reduced sensitivity from 2.5 to 1.8 for smoother control
-                const headX = (0.5 - noseTip.x) * 1.8; 
-                const headY = (0.5 - noseTip.y) * 1.8;
-
-                // 2. Eye Gaze from Blendshapes (Independent of head movement)
-                // Left Eye
-                const eyeLookInLeft = blendshapes.find(s => s.categoryName === 'eyeLookInLeft')?.score || 0;
-                const eyeLookOutLeft = blendshapes.find(s => s.categoryName === 'eyeLookOutLeft')?.score || 0;
-                const eyeLookUpLeft = blendshapes.find(s => s.categoryName === 'eyeLookUpLeft')?.score || 0;
-                const eyeLookDownLeft = blendshapes.find(s => s.categoryName === 'eyeLookDownLeft')?.score || 0;
+                // --- Blink / Squint Detection ---
+                // Indices for blink: eyeBlinkLeft (9), eyeBlinkRight (10)
+                const eyeBlinkLeft = blendshapes.find(shape => shape.categoryName === 'eyeBlinkLeft');
+                const eyeBlinkRight = blendshapes.find(shape => shape.categoryName === 'eyeBlinkRight');
                 
-                // Right Eye
-                const eyeLookInRight = blendshapes.find(s => s.categoryName === 'eyeLookInRight')?.score || 0;
-                const eyeLookOutRight = blendshapes.find(s => s.categoryName === 'eyeLookOutRight')?.score || 0;
-                const eyeLookUpRight = blendshapes.find(s => s.categoryName === 'eyeLookUpRight')?.score || 0;
-                const eyeLookDownRight = blendshapes.find(s => s.categoryName === 'eyeLookDownRight')?.score || 0;
+                const blinkScore = (eyeBlinkLeft?.score + eyeBlinkRight?.score) / 2 || 0;
+                
+                let tension = (blinkScore - 0.05) * 1.5;
+                tension = Math.max(0, Math.min(1, tension));
 
-                // Calculate Gaze Vectors
-                const lookLeftScore = eyeLookOutLeft + eyeLookInRight;
-                const lookRightScore = eyeLookInLeft + eyeLookOutRight;
-                const lookUpScore = eyeLookUpLeft + eyeLookUpRight;
-                const lookDownScore = eyeLookDownLeft + eyeLookDownRight;
+                // --- Gaze / Head Position Detection ---
+                if (results.faceLandmarks && results.faceLandmarks.length > 0) {
+                    const landmarks = results.faceLandmarks[0];
+                    
+                    // 1. Head Position (Nose Tip)
+                    const noseTip = landmarks[1];
+                    const headX = (0.5 - noseTip.x) * 1.8; 
+                    const headY = (0.5 - noseTip.y) * 1.8;
 
-                // Net Gaze Delta (-1 to 1 range approx)
-                // Reduced sensitivity from 1.5 to 1.0 for finer precision
-                const gazeX = (lookRightScore - lookLeftScore) * 1.0; 
-                const gazeY = (lookUpScore - lookDownScore) * 1.0;
+                    // 2. Eye Gaze from Blendshapes
+                    const eyeLookInLeft = blendshapes.find(s => s.categoryName === 'eyeLookInLeft')?.score || 0;
+                    const eyeLookOutLeft = blendshapes.find(s => s.categoryName === 'eyeLookOutLeft')?.score || 0;
+                    const eyeLookUpLeft = blendshapes.find(s => s.categoryName === 'eyeLookUpLeft')?.score || 0;
+                    const eyeLookDownLeft = blendshapes.find(s => s.categoryName === 'eyeLookDownLeft')?.score || 0;
+                    
+                    const eyeLookInRight = blendshapes.find(s => s.categoryName === 'eyeLookInRight')?.score || 0;
+                    const eyeLookOutRight = blendshapes.find(s => s.categoryName === 'eyeLookOutRight')?.score || 0;
+                    const eyeLookUpRight = blendshapes.find(s => s.categoryName === 'eyeLookUpRight')?.score || 0;
+                    const eyeLookDownRight = blendshapes.find(s => s.categoryName === 'eyeLookDownRight')?.score || 0;
 
-                // Combine Head + Gaze
-                // Head provides base "center", Gaze provides fine offset.
-                let totalX = headX + gazeX;
-                let totalY = headY + gazeY;
+                    const lookLeftScore = eyeLookOutLeft + eyeLookInRight;
+                    const lookRightScore = eyeLookInLeft + eyeLookOutRight;
+                    const lookUpScore = eyeLookUpLeft + eyeLookUpRight;
+                    const lookDownScore = eyeLookDownLeft + eyeLookDownRight;
 
-                // --- Mobile Correction ---
-                // On mobile (portrait), the x/y scaling might be off due to aspect ratio.
-                // If width < height, X axis movement needs to be amplified to reach edges.
-                // We can check window.innerWidth/Height
-                if (window.innerWidth < window.innerHeight) {
-                    const aspectRatio = window.innerHeight / window.innerWidth;
-                    totalX *= aspectRatio * 1.2; // Boost X on portrait to reach edges
+                    const gazeX = (lookRightScore - lookLeftScore) * 1.0; 
+                    const gazeY = (lookUpScore - lookDownScore) * 1.0;
+
+                    let totalX = headX + gazeX;
+                    let totalY = headY + gazeY;
+
+                    // --- Mobile Correction ---
+                    if (window.innerWidth < window.innerHeight) {
+                        const aspectRatio = window.innerHeight / window.innerWidth;
+                        totalX *= aspectRatio * 1.2; 
+                    }
+
+                    setGestureState({
+                        isHandDetected: true, 
+                        tension: tension,
+                        position: { 
+                            x: Math.max(-1, Math.min(1, totalX)), 
+                            y: Math.max(-1, Math.min(1, totalY)) 
+                        }
+                    });
                 }
-
-            setGestureState({
-                isHandDetected: true, 
-                tension: tension,
-                position: { 
-                    x: Math.max(-1, Math.min(1, totalX)), 
-                    y: Math.max(-1, Math.min(1, totalY)) 
-                }
-            });
-        }
-      } else {
-         // No face detected - Reset to Center (Idle)
-         setGestureState(prev => ({ 
-             ...prev, 
-             isHandDetected: false,
-             tension: 0,
-             position: { x: 0, y: 0 } // Lock to center on idle
-         }));
-      }
+            } else {
+                // Waiting for delay, keep previous state (likely idle)
+                // No update to GestureState, just visual status
+            }
+          } else {
+             // No face detected - Reset
+             detectionStartTime.current = null;
+             if (status === "TRACKING" || status === "ACQUIRING...") {
+                 setStatus("SEARCHING...");
+             }
+             
+             setGestureState(prev => ({ 
+                 ...prev, 
+                 isHandDetected: false,
+                 tension: 0,
+                 position: { x: 0, y: 0 } // Lock to center on idle
+             }));
+          }
       } catch (e) {
           console.error("Detection error:", e);
       }
