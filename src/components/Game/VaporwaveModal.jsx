@@ -71,7 +71,7 @@ export default function VaporwaveModal() {
                         <ul className="space-y-3 text-left text-sm font-mono text-pink-200">
                             <li className="flex items-start gap-3">
                                 <div className="w-1.5 h-1.5 mt-1.5 rounded-full bg-yellow-400 shadow-[0_0_8px_#fbbf24]" />
-                                <span>Move Hand to control the <strong className="text-yellow-400">Black Hole</strong></span>
+                                <span>Move <strong className="text-yellow-400">Head</strong> to control the Black Hole</span>
                             </li>
                             <li className="flex items-start gap-3">
                                 <div className="w-1.5 h-1.5 mt-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]" />
@@ -83,7 +83,7 @@ export default function VaporwaveModal() {
                             </li>
                             <li className="flex items-start gap-3">
                                 <Skull className="w-4 h-4 text-red-500" />
-                                <span><strong className="text-red-500">Open Hand</strong> lets antimatter pass through safely</span>
+                                <span><strong className="text-red-500">Open Eyes</strong> let antimatter pass safely. <strong className="text-cyan-400">Blink/Close</strong> to activate gravity.</span>
                             </li>
                         </ul>
                     </div>

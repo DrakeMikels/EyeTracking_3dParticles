@@ -1,6 +1,6 @@
 import React from 'react';
 import Scene from './components/Scene';
-import HandTracker from './components/HandTracker';
+import EyeTracker from './components/EyeTracker';
 import Overlay from './components/ui/Overlay';
 import VaporwaveModal from './components/Game/VaporwaveModal';
 import { GestureProvider } from './context/GestureContext';
@@ -14,7 +14,7 @@ function App() {
     <GestureProvider>
       <main className="w-full h-screen bg-black text-white overflow-hidden font-sans relative">
         <Scene />
-        <HandTracker />
+        <EyeTracker />
         <Overlay />
         <VaporwaveModal />
       </main>

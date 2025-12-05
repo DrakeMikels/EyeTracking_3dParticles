@@ -191,7 +191,7 @@ export default function GameManager() {
                  font="https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hjp-Ek-_EeA.woff"
                  fillOpacity={0.5}
             >
-                {gestureState.tension > 0.5 ? "GRAVITY WELL: ACTIVE" : "GRAVITY WELL: IDLE"}
+                {gestureState.tension > 0.5 ? "GRAVITY WELL: ACTIVE (EYES CLOSED)" : "GRAVITY WELL: IDLE (EYES OPEN)"}
             </Text>
         </group>
     );

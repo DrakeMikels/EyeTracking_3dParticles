@@ -101,8 +101,8 @@ export default function Overlay() {
                                             <Maximize2 className="h-4 w-4" />
                                         </div>
                                         <div className="flex-1">
-                                            <p className="text-sm font-medium text-white/90">Expansion</p>
-                                            <p className="text-[11px] text-white/40 mt-0.5">Clench fist to expand</p>
+                                            <p className="text-sm font-medium text-white/90">Gravity Well</p>
+                                            <p className="text-[11px] text-white/40 mt-0.5">Blink eyes to activate</p>
                                         </div>
                                     </div>
                                 </div>
@@ -115,8 +115,8 @@ export default function Overlay() {
                                             <Move className="h-4 w-4" />
                                         </div>
                                         <div className="flex-1">
-                                            <p className="text-sm font-medium text-white/90">Rotation</p>
-                                            <p className="text-[11px] text-white/40 mt-0.5">Move hand to rotate</p>
+                                            <p className="text-sm font-medium text-white/90">Movement</p>
+                                            <p className="text-[11px] text-white/40 mt-0.5">Move head to control</p>
                                         </div>
                                     </div>
                                 </div>
