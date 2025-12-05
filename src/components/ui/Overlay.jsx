@@ -164,17 +164,23 @@ export default function Overlay() {
                                             className={cn(
                                                 "flex-grow basis-[30%] h-14 rounded-xl border transition-all duration-500 relative overflow-hidden group",
                                                 isActive 
-                                                    ? "bg-white/[0.03] border-cyan-500/30 text-cyan-50 shadow-[0_0_20px_rgba(0,200,255,0.15)]" 
-                                                    : "bg-[#0a0a0a] border-white/5 text-white/30 hover:border-white/10 hover:text-white/60",
+                                                    ? "bg-white/[0.03] border-cyan-500/50 text-cyan-50 shadow-[0_0_25px_rgba(0,200,255,0.3)]" 
+                                                    : "bg-[#0a0a0a] border-white/10 text-white/50 hover:border-white/30 hover:text-white/80",
                                                 isGame && isActive && "border-purple-500/50 shadow-[0_0_30px_rgba(255,0,255,0.3)] bg-purple-900/10",
-                                                isGame && !isActive && "hover:border-purple-500/30 hover:text-purple-300 hover:shadow-[0_0_15px_rgba(255,0,255,0.15)]"
+                                                isGame && !isActive && "border-purple-500/30 text-purple-300/70 shadow-[0_0_15px_rgba(255,0,255,0.15)]"
                                             )}
                                         >
                                             {isGame && (
-                                                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-fuchsia-500/20 to-cyan-500/20 opacity-100 blur-md animate-pulse" />
+                                                <div className={cn(
+                                                    "absolute inset-0 bg-gradient-to-r from-purple-500/20 via-fuchsia-500/20 to-cyan-500/20 blur-md transition-opacity duration-500",
+                                                    isActive ? "opacity-100 animate-pulse" : "opacity-60 hover:opacity-80"
+                                                )} />
                                             )}
                                             {isGame && (
-                                                <div className="absolute inset-0 rounded-xl ring-1 ring-purple-500/50 shadow-[0_0_10px_rgba(168,85,247,0.5)] animate-pulse" />
+                                                <div className={cn(
+                                                    "absolute inset-0 rounded-xl ring-1 shadow-[0_0_10px_rgba(168,85,247,0.5)] transition-all",
+                                                    isActive ? "ring-purple-500/50 animate-pulse" : "ring-purple-500/30 opacity-70"
+                                                )} />
                                             )}
                                             {isActive && <div className={cn("absolute inset-0 blur-md", isGame ? "bg-purple-500/30" : "bg-cyan-500/10")} />}
                                             <div className="relative z-10 flex flex-col items-center justify-center gap-1">
