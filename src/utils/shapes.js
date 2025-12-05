@@ -15,15 +15,79 @@ export function getSpherePoints(count) {
     return positions;
 }
 
+// Eye Shape (Sclera + Iris)
+export function getEyePoints(count) {
+    const positions = new Float32Array(count * 3);
+    const irisRatio = 0.2; // 20% of particles for Iris
+    const irisCount = Math.floor(count * irisRatio);
+    const scleraCount = count - irisCount;
+
+    // Sclera (Eyeball - White part)
+    for (let i = 0; i < scleraCount; i++) {
+        const r = 2.0; 
+        // Use sphere surface distribution but hollow
+        const theta = Math.random() * 2 * Math.PI;
+        const phi = Math.acos(2 * Math.random() - 1);
+        
+        // Slight noise for fuzziness
+        const noise = 1 + (Math.random() - 0.5) * 0.1;
+
+        positions[i * 3] = r * Math.sin(phi) * Math.cos(theta) * noise;
+        positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta) * noise;
+        positions[i * 3 + 2] = r * Math.cos(phi) * noise;
+    }
+
+    // Iris (Concave disk or smaller sphere section)
+    // We'll start them at center-front (z+)
+    for (let i = scleraCount; i < count; i++) {
+        const r = 0.8 * Math.sqrt(Math.random()); // Disk radius
+        const theta = Math.random() * 2 * Math.PI;
+        
+        // Position them slightly in front of sphere surface to pop
+        positions[i * 3] = r * Math.cos(theta);
+        positions[i * 3 + 1] = r * Math.sin(theta);
+        positions[i * 3 + 2] = 2.2; // Push forward Z
+    }
+
+    return positions;
+}
+
+// Neural Cloud (Brain-like nebula)
+export function getNeuralPoints(count) {
+    const positions = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
+        // Two lobes structure
+        const lobe = Math.random() > 0.5 ? 1 : -1;
+        
+        // Ellipsoid for each lobe
+        const r = Math.cbrt(Math.random());
+        const theta = Math.random() * 2 * Math.PI;
+        const phi = Math.acos(2 * Math.random() - 1);
+
+        const scaleX = 1.2;
+        const scaleY = 1.0;
+        const scaleZ = 1.5;
+        const offsetX = 0.8 * lobe;
+
+        const x = r * Math.sin(phi) * Math.cos(theta) * scaleX + offsetX;
+        const y = r * Math.sin(phi) * Math.sin(theta) * scaleY;
+        const z = r * Math.cos(phi) * scaleZ;
+
+        // Add "synapse" noise - lines connecting points?
+        // We can just add high frequency noise to simulate complexity
+        const noise = (Math.random() - 0.5) * 0.2;
+
+        positions[i * 3] = x + noise;
+        positions[i * 3 + 1] = y + noise;
+        positions[i * 3 + 2] = z + noise;
+    }
+    return positions;
+}
+
 // Heart Shape
 export function getHeartPoints(count) {
     const positions = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-        // Parametric heart equation
-        // x = 16sin^3(t)
-        // y = 13cos(t) - 5cos(2t) - 2cos(3t) - cos(4t)
-        // z = random thickness
-
         const t = Math.random() * 2 * Math.PI;
         const scale = 0.15;
 
@@ -120,8 +184,7 @@ export function getFireworksPoints(count) {
     return positions;
 }
 
-// Buddha (Approximation using stacked spheres/cylinders or just a meditative pose shape)
-// Since we don't have a model, let's try a procedural "Snowman" style or simple meditative silhouette
+// Buddha
 export function getBuddhaPoints(count) {
     const positions = new Float32Array(count * 3);
     // Head, Body, Base

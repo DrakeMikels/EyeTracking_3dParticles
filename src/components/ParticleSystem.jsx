@@ -3,13 +3,15 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import * as maath from 'maath/random/dist/maath-random.esm';
 import { useGesture } from '../context/GestureContext';
-import { getSpherePoints, getHeartPoints, getFlowerPoints, getSaturnPoints, getBuddhaPoints, getFireworksPoints } from '@/utils/shapes';
+import { getSpherePoints, getHeartPoints, getFlowerPoints, getSaturnPoints, getBuddhaPoints, getFireworksPoints, getEyePoints, getNeuralPoints } from '@/utils/shapes';
 
 // Helper to generate shape positions
 const generateShapePositions = (shape, count) => {
     switch (shape) {
         case 'sphere': return getSpherePoints(count);
-        case 'earth': return getSpherePoints(count); // Earth uses texture, but points can follow sphere
+        case 'eye': return getEyePoints(count);
+        case 'neural': return getNeuralPoints(count);
+        case 'earth': return getSpherePoints(count); 
         case 'heart': return getHeartPoints(count);
         case 'flower': return getFlowerPoints(count);
         case 'saturn': return getSaturnPoints(count);
@@ -41,6 +43,8 @@ export default function ParticleSystem() {
     const shapePositions = useMemo(() => {
         return {
             sphere: generateShapePositions('sphere', count),
+            eye: generateShapePositions('eye', count),
+            neural: generateShapePositions('neural', count),
             earth: generateShapePositions('earth', count),
             heart: generateShapePositions('heart', count),
             flower: generateShapePositions('flower', count),
@@ -89,6 +93,7 @@ export default function ParticleSystem() {
 
         // Game Mode Logic vs Shape Logic
         if (currentShape === 'game') {
+            // ... (keep existing game logic intact, or re-insert if needed) ...
             const { viewport } = state;
             // Map hand position to viewport (same logic as GameManager)
             // Use 4 and 3 as approximation if viewport not available, but let's stick to consistent scalars
@@ -128,6 +133,84 @@ export default function ParticleSystem() {
                 positions[ix] = THREE.MathUtils.lerp(positions[ix], targetX + ox, 0.1);
                 positions[iy] = THREE.MathUtils.lerp(positions[iy], targetY + oy, 0.1);
                 positions[iz] = THREE.MathUtils.lerp(positions[iz], oz, 0.1);
+            }
+
+        } else if (currentShape === 'eye') {
+            // EYE ANIMATION LOGIC
+            // Pupil/Iris parts (last 20% of array) should track gaze slightly more aggressively or constrict on tension
+            const irisStartIndex = Math.floor(count * 0.8); 
+            
+            // Dilation/Constriction based on tension (squinting = constrict)
+            // Normal radius ~0.8. Constricted ~0.3.
+            const pupilScale = THREE.MathUtils.lerp(1.0, 0.4, tension);
+
+            for (let i = 0; i < count; i++) {
+                const ix = i * 3;
+                const iy = i * 3 + 1;
+                const iz = i * 3 + 2;
+
+                let tx = targetPositions[ix];
+                let ty = targetPositions[iy];
+                let tz = targetPositions[iz];
+
+                if (i >= irisStartIndex) {
+                    // This is the Iris/Pupil
+                    // We want to move them towards the gaze position (relative to sphere center)
+                    // Just sliding them on X/Y is simplest effect
+                    
+                    // Scale pupil
+                    tx *= pupilScale;
+                    ty *= pupilScale;
+                    
+                    // Gaze tracking: Move pupil towards gesture position
+                    const gazeX = position.x * 1.5; 
+                    const gazeY = position.y * 1.5;
+                    
+                    tx += gazeX;
+                    ty += gazeY;
+                    
+                    // Push forward slightly when focused
+                    tz += 0.2 + tension * 0.5;
+                }
+
+                const lerpSpeed = 0.1;
+                positions[ix] = THREE.MathUtils.lerp(positions[ix], tx, lerpSpeed);
+                positions[iy] = THREE.MathUtils.lerp(positions[iy], ty, lerpSpeed);
+                positions[iz] = THREE.MathUtils.lerp(positions[iz], tz, lerpSpeed);
+            }
+
+        } else if (currentShape === 'neural') {
+            // NEURAL ANIMATION LOGIC
+            // Pulse on tension
+            const time = state.clock.elapsedTime;
+            
+            for (let i = 0; i < count; i++) {
+                const ix = i * 3;
+                const iy = i * 3 + 1;
+                const iz = i * 3 + 2;
+
+                let tx = targetPositions[ix];
+                let ty = targetPositions[iy];
+                let tz = targetPositions[iz];
+
+                // Synaptic firing effect
+                // Random neurons light up or move based on noise + tension
+                if (Math.random() > 0.95) {
+                    tx += (Math.random() - 0.5) * 0.1 * tension;
+                    ty += (Math.random() - 0.5) * 0.1 * tension;
+                    tz += (Math.random() - 0.5) * 0.1 * tension;
+                }
+                
+                // Overall throbbing
+                const pulse = 1 + Math.sin(time * 2 + i * 0.01) * 0.05 * (1 + tension * 5);
+                tx *= pulse;
+                ty *= pulse;
+                tz *= pulse;
+
+                const lerpSpeed = 0.05;
+                positions[ix] = THREE.MathUtils.lerp(positions[ix], tx, lerpSpeed);
+                positions[iy] = THREE.MathUtils.lerp(positions[iy], ty, lerpSpeed);
+                positions[iz] = THREE.MathUtils.lerp(positions[iz], tz, lerpSpeed);
             }
 
         } else {
