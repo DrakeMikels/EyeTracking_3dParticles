@@ -52,7 +52,6 @@ export default function EyeTracker() {
 
   const startWebcam = async () => {
     try {
-      // Constraints: Ideal 640x480, but accept whatever mobile gives
       const stream = await navigator.mediaDevices.getUserMedia({ 
         video: { 
             width: { ideal: 640 }, 
@@ -63,11 +62,17 @@ export default function EyeTracker() {
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        // Explicit play for iOS compatibility
-        videoRef.current.onloadeddata = () => {
-            videoRef.current.play().catch(e => console.error("Play failed", e));
+        
+        // Wait for metadata to size the video element properly
+        videoRef.current.onloadedmetadata = () => {
+            videoRef.current.play().catch(e => console.error("Play error", e));
+            
+            // CRITICAL: MediaPipe needs explicit width/height on the video element
+            videoRef.current.width = videoRef.current.videoWidth;
+            videoRef.current.height = videoRef.current.videoHeight;
+            
             setStatus("TRACKING");
-            predictWebcam();
+            requestRef.current = requestAnimationFrame(predictWebcam);
         };
       }
     } catch (err) {
@@ -80,9 +85,11 @@ export default function EyeTracker() {
     const landmarker = faceLandmarkerRef.current;
     const video = videoRef.current;
 
-    if (landmarker && video && video.currentTime > 0) {
+    if (landmarker && video && !video.paused && video.readyState >= 2) { // Check readyState
       const startTimeMs = performance.now();
-      const results = landmarker.detectForVideo(video, startTimeMs);
+      try {
+          const results = landmarker.detectForVideo(video, startTimeMs);
+          // ... rest of processing ...
 
       if (results.faceBlendshapes && results.faceBlendshapes.length > 0) {
         const blendshapes = results.faceBlendshapes[0].categories;
