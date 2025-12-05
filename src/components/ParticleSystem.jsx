@@ -89,30 +89,45 @@ export default function ParticleSystem() {
 
         // Game Mode Logic vs Shape Logic
         if (currentShape === 'game') {
-            // In game mode, particles follow the hand position (Black Hole effect)
-            // Target X/Y comes from hand position mapped to world space
-            const targetX = position.x * 4;
-            const targetY = position.y * 3;
+            const { viewport } = state;
+            // Map hand position to viewport (same logic as GameManager)
+            // Use 4 and 3 as approximation if viewport not available, but let's stick to consistent scalars
+            // GameManager uses: gestureState.position.x * (viewport.width / 2)
+            // Here we don't have viewport easily without hook, but we can assume ~6 width ~4 height
+            const targetX = position.x * 6; 
+            const targetY = position.y * 4;
+            
+            const time = state.clock.elapsedTime;
             
             for (let i = 0; i < count; i++) {
                 const ix = i * 3;
                 const iy = i * 3 + 1;
                 const iz = i * 3 + 2;
 
-                // Get local offset from the 'game' shape definition (small sphere)
-                const ox = targetPositions[ix];
-                const oy = targetPositions[iy];
-                const oz = targetPositions[iz];
+                // Create a vortex effect
+                // Each particle has a random angle and radius
+                const angleOffset = i * 0.01;
+                const radiusBase = (i % 100) * 0.01 + 0.2; // Distribution
+                
+                // Tension affects the "tightness" of the black hole
+                // High tension = tight collapse (Gravity Well)
+                // Low tension = loose cloud
+                const tightness = THREE.MathUtils.lerp(1.5, 0.2, tension); 
+                const speed = 2.0 + tension * 5.0; // Spin faster when closed
 
-                // Apply swirl/noise
-                const time = state.clock.elapsedTime;
-                const swirl = Math.sin(time + i) * 0.1 * tension;
+                const angle = time * speed + angleOffset;
+                const r = radiusBase * tightness;
 
-                // Lerp to hand position + local offset
-                // We use a faster lerp for responsiveness
-                positions[ix] = THREE.MathUtils.lerp(positions[ix], targetX + ox + swirl, 0.15);
-                positions[iy] = THREE.MathUtils.lerp(positions[iy], targetY + oy + swirl, 0.15);
-                positions[iz] = THREE.MathUtils.lerp(positions[iz], oz, 0.15);
+                // Spiral coordinates relative to hand
+                const ox = Math.cos(angle) * r;
+                const oy = Math.sin(angle) * r;
+                const oz = (Math.sin(angle * 3 + time) * 0.2) * tightness; // Slight wavy Z
+
+                // Lerp current position to Target(Hand) + Offset
+                // Using a slightly loose lerp for fluid trail effect
+                positions[ix] = THREE.MathUtils.lerp(positions[ix], targetX + ox, 0.1);
+                positions[iy] = THREE.MathUtils.lerp(positions[iy], targetY + oy, 0.1);
+                positions[iz] = THREE.MathUtils.lerp(positions[iz], oz, 0.1);
             }
 
         } else {
