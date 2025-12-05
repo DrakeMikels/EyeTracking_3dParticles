@@ -1,24 +1,27 @@
-import React, { useRef, useEffect, useState, useMemo } from 'react';
-import { useFrame } from '@react-three/fiber';
+import React, { useRef, useEffect, useState } from 'react';
+import { useFrame, useThree } from '@react-three/fiber';
 import { useGesture } from '../../context/GestureContext';
 import * as THREE from 'three';
 import { Text } from '@react-three/drei';
 
-const GAME_BOUNDS = 3; // Range for spawning (-3 to 3)
-const SPAWN_RATE = 60; // Frames between spawns
+// Bounds for spawning - keep it tighter to screen
+const SPAWN_RATE = 30; // Faster spawns (was 60)
 const PLAYER_RADIUS = 0.3;
-const COLLECTION_RADIUS = 0.4;
+const COLLECTION_RADIUS = 0.5; // Slightly larger hitbox
 
 export default function GameManager() {
     const { gestureState, gameState, setGameState, currentShape } = useGesture();
+    const { viewport } = useThree(); // Get viewport size to constrain game to screen
     const targetsRef = useRef([]);
-    const [targets, setTargets] = useState([]); // { id, position: [x,y,z], type: 'gold' | 'antimatter', active: true }
+    const [targets, setTargets] = useState([]);
     const frameCount = useRef(0);
-    const scoreRef = useRef(0); // Ref for frequent updates without re-renders
-    
-    // Audio Refs (simple oscillators could be added here, but sticking to visual for now)
+    const scoreRef = useRef(0);
 
-    // Reset game when mode changes to playing
+    // Dynamic Game Bounds based on viewport (screen size)
+    // Reduce slightly so they don't spawn on the very edge
+    const boundsX = (viewport.width / 2) * 0.8;
+    const boundsY = (viewport.height / 2) * 0.8;
+
     useEffect(() => {
         if (gameState.gameMode === 'playing') {
             setTargets([]);
@@ -33,15 +36,20 @@ export default function GameManager() {
 
         frameCount.current++;
 
-        // 1. Spawning Logic
+        // 1. Spawning Logic (Faster)
         if (frameCount.current % SPAWN_RATE === 0) {
-            const isAntimatter = Math.random() > 0.7; // 30% chance of bad guy
+            const isAntimatter = Math.random() > 0.7;
             const newTarget = {
                 id: Math.random(),
                 position: [
-                    (Math.random() - 0.5) * GAME_BOUNDS * 2,
-                    (Math.random() - 0.5) * GAME_BOUNDS * 2,
-                    (Math.random() - 0.5) * 2 // Shallow depth
+                    (Math.random() - 0.5) * boundsX * 2,
+                    (Math.random() - 0.5) * boundsY * 2,
+                    (Math.random() - 0.5) * 2
+                ],
+                velocity: [
+                    (Math.random() - 0.5) * 1, // Add slight drift
+                    (Math.random() - 0.5) * 1,
+                    0
                 ],
                 type: isAntimatter ? 'antimatter' : 'gold',
                 active: true,
@@ -52,29 +60,39 @@ export default function GameManager() {
             targetsRef.current.push(newTarget);
         }
 
-        // 2. Movement & Collision Logic
-        // Hand position mapped from gestureState (-1 to 1) to World Space (~ -4 to 4)
-        const handX = gestureState.position.x * 4;
-        const handY = gestureState.position.y * 3; // Aspect ratio adj
+        // 2. Player Hand Position mapped to Viewport
+        // gestureState.position is -1 to 1. Map to viewport dimensions.
+        // Invert X because webcam is usually mirrored? Or standard? 
+        // Let's assume standard mapping first: -1(left) to 1(right).
+        const handX = gestureState.position.x * (viewport.width / 2);
+        const handY = gestureState.position.y * (viewport.height / 2);
         const handZ = 0;
 
-        // Check collisions
         let scoreChanged = false;
         
         targetsRef.current.forEach(target => {
             if (!target.active) return;
 
-            // Simple attraction to hand
+            // Apply drift velocity
+            target.position[0] += target.velocity[0] * delta;
+            target.position[1] += target.velocity[1] * delta;
+
+            // Constrain to bounds (bounce)
+            if (Math.abs(target.position[0]) > boundsX) target.velocity[0] *= -1;
+            if (Math.abs(target.position[1]) > boundsY) target.velocity[1] *= -1;
+
+            // Distance to hand
             const dx = handX - target.position[0];
             const dy = handY - target.position[1];
             const dz = handZ - target.position[2];
             const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
 
-            // Move towards hand if close (Magnetic effect)
-            if (dist < 2.0) {
-                target.position[0] += dx * delta * 1.5;
-                target.position[1] += dy * delta * 1.5;
-                target.position[2] += dz * delta * 1.5;
+            // Magnetic attraction (stronger now)
+            if (dist < 3.0) {
+                const strength = 2.5; // Faster attraction
+                target.position[0] += dx * delta * strength;
+                target.position[1] += dy * delta * strength;
+                target.position[2] += dz * delta * strength;
             }
 
             // Collision
@@ -84,23 +102,18 @@ export default function GameManager() {
                     target.active = false;
                     scoreChanged = true;
                 } else if (target.type === 'antimatter') {
-                    // If hand is OPEN (tension < 0.5), safe to pass? 
-                    // The prompt said: "If you suck those in (close fist near them), you lose points. You have to open your hand to let them pass."
-                    // So if Tension > 0.5 (Fist), collision triggers bad things.
+                    // Tension > 0.5 means Fist Closed (Sucking mode) -> BAD for Antimatter
                     if (gestureState.tension > 0.5) {
                         scoreRef.current -= 50;
-                        target.active = false; // Consumed
+                        target.active = false;
                         scoreChanged = true;
-                        // Trigger screen shake or visual feedback here?
                     }
                 }
             }
         });
 
-        // Cleanup inactive targets
         if (scoreChanged) {
             setGameState(prev => ({ ...prev, score: scoreRef.current }));
-            // Filter out consumed targets from ref and state to keep arrays small
             const activeTargets = targetsRef.current.filter(t => t.active);
             targetsRef.current = activeTargets;
             setTargets(activeTargets);
@@ -109,12 +122,22 @@ export default function GameManager() {
 
     if (currentShape !== 'game' || gameState.gameMode !== 'playing') return null;
 
+    // Calculate Hand Position for rendering cursor
+    const cursorX = gestureState.position.x * (viewport.width / 2);
+    const cursorY = gestureState.position.y * (viewport.height / 2);
+
     return (
         <group>
             {/* Player Cursor / Black Hole Center */}
-            <mesh position={[gestureState.position.x * 4, gestureState.position.y * 3, 0]}>
-                <sphereGeometry args={[0.2, 16, 16]} />
-                <meshBasicMaterial color="white" transparent opacity={0.5} wireframe />
+            <mesh position={[cursorX, cursorY, 0]}>
+                <sphereGeometry args={[PLAYER_RADIUS, 16, 16]} />
+                <meshBasicMaterial color={gestureState.tension > 0.5 ? "#ff00ff" : "white"} transparent opacity={0.3} wireframe />
+            </mesh>
+            
+            {/* Visual Boundary Guide (optional, helps see play area) */}
+            <mesh>
+                <ringGeometry args={[0, 0, 4, 1]} /> 
+                {/* Just a helper logic, maybe not render a box, but we know bounds */}
             </mesh>
             
             {/* Targets */}
@@ -122,16 +145,28 @@ export default function GameManager() {
                 <Target key={target.id} position={target.position} type={target.type} />
             ))}
 
-            {/* In-Game HUD (Floating in 3D space or use HTML overlay? sticking to HTML in modal is safer, but let's add a 3D score floater) */}
+            {/* In-Game HUD - 3D Text at top of Viewport */}
             <Text 
-                position={[0, 3.5, -2]} 
+                position={[0, (viewport.height/2) - 1, 0]} 
                 fontSize={0.5} 
                 color="#00ffff" 
                 anchorX="center" 
-                anchorY="middle"
-                font="/fonts/Inter-Bold.woff" // Ideally use a font file, but might fallback
+                anchorY="top"
+                font="https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hjp-Ek-_EeA.woff"
             >
                 SCORE: {gameState.score}
+            </Text>
+            
+            <Text
+                 position={[0, -(viewport.height/2) + 0.5, 0]}
+                 fontSize={0.2}
+                 color="white"
+                 anchorX="center"
+                 anchorY="bottom"
+                 font="https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hjp-Ek-_EeA.woff"
+                 fillOpacity={0.5}
+            >
+                {gestureState.tension > 0.5 ? "GRAVITY WELL ACTIVE (FIST)" : "SAFE MODE (OPEN HAND)"}
             </Text>
         </group>
     );
@@ -140,26 +175,35 @@ export default function GameManager() {
 function Target({ position, type }) {
     const color = type === 'gold' ? '#ffd700' : '#ff0000';
     const meshRef = useRef();
+    
+    // Random rotation speed for variety
+    const rotSpeed = useRef({ x: Math.random(), y: Math.random() });
 
     useFrame((state, delta) => {
         if(meshRef.current) {
-            meshRef.current.rotation.x += delta;
-            meshRef.current.rotation.y += delta * 0.5;
+            meshRef.current.rotation.x += delta * rotSpeed.current.x;
+            meshRef.current.rotation.y += delta * rotSpeed.current.y;
+            
+            // Pulse effect
+            const scale = 1 + Math.sin(state.clock.elapsedTime * 5) * 0.1;
+            meshRef.current.scale.set(scale, scale, scale);
         }
     });
 
     return (
         <mesh ref={meshRef} position={new THREE.Vector3(...position)}>
             {type === 'gold' ? (
-                <octahedronGeometry args={[0.15, 0]} />
+                <octahedronGeometry args={[0.2, 0]} />
             ) : (
-                <dodecahedronGeometry args={[0.15, 0]} />
+                <dodecahedronGeometry args={[0.25, 0]} /> // Slightly bigger bad guys
             )}
             <meshStandardMaterial 
                 color={color} 
                 emissive={color}
                 emissiveIntensity={2}
                 toneMapped={false}
+                transparent
+                opacity={0.9}
             />
         </mesh>
     );
