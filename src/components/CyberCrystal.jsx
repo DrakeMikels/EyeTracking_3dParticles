@@ -16,8 +16,8 @@ export default function CyberCrystal() {
         
         // 1. Rotation based on Head Movement
         // Smooth lerp for fluid feel
-        meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, position.x * 2.3 + state.clock.elapsedTime * 0.2, 0.05);
-        meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, -position.y * 2.3 + state.clock.elapsedTime * 0.1, 0.05);
+        meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, position.x * 2.3 + state.clock.elapsedTime * 0.2, 0.04);
+        meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, -position.y * 2.3 + state.clock.elapsedTime * 0.1, 0.04);
 
         // 2. Distortion/Pulse based on Tension (Squint)
         // Base distort: 0.3
@@ -26,8 +26,8 @@ export default function CyberCrystal() {
         const targetSpeed = 2 + tension * 5;
         
         if (materialRef.current) {
-            materialRef.current.distort = THREE.MathUtils.lerp(materialRef.current.distort, targetDistort, 0.1);
-            materialRef.current.speed = THREE.MathUtils.lerp(materialRef.current.speed, targetSpeed, 0.1);
+            materialRef.current.distort = THREE.MathUtils.lerp(materialRef.current.distort, targetDistort, 0.05);
+            materialRef.current.speed = THREE.MathUtils.lerp(materialRef.current.speed, targetSpeed, 0.05);
             
             // 3. Color Shift on Squint
             const baseColor = new THREE.Color(particleColor);

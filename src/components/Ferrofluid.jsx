@@ -19,8 +19,8 @@ export default function Ferrofluid() {
         const targetX = position.x * 2.3;
         const targetY = position.y * 2.3;
         
-        meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, targetX, 0.08);
-        meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, targetY, 0.08);
+        meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, targetX, 0.04);
+        meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, targetY, 0.04);
         
         if (outerGlowRef.current) {
             outerGlowRef.current.position.copy(meshRef.current.position);

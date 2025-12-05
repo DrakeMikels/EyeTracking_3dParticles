@@ -80,8 +80,8 @@ export default function ParticleSystem() {
         // Rotation based on hand position (X axis -> Y rotation, Y axis -> X rotation)
         // In game mode, we don't rotate the whole system, we move the cluster
         if (currentShape !== 'game') {
-            pointsRef.current.rotation.y = THREE.MathUtils.lerp(pointsRef.current.rotation.y, position.x * 2.3, 0.1);
-            pointsRef.current.rotation.x = THREE.MathUtils.lerp(pointsRef.current.rotation.x, -position.y * 2.3, 0.1);
+            pointsRef.current.rotation.y = THREE.MathUtils.lerp(pointsRef.current.rotation.y, position.x * 2.3, 0.04); // Smoother
+            pointsRef.current.rotation.x = THREE.MathUtils.lerp(pointsRef.current.rotation.x, -position.y * 2.3, 0.04); // Smoother
         } else {
             // Game Mode: Reset rotation
             pointsRef.current.rotation.y = THREE.MathUtils.lerp(pointsRef.current.rotation.y, 0, 0.1);
@@ -167,7 +167,7 @@ export default function ParticleSystem() {
                     tz += 0.2 + tension * 0.5;
                 }
 
-                const lerpSpeed = 0.1;
+                const lerpSpeed = 0.05; // Reduced from 0.1 for smoother particles
                 positions[ix] = THREE.MathUtils.lerp(positions[ix], tx, lerpSpeed);
                 positions[iy] = THREE.MathUtils.lerp(positions[iy], ty, lerpSpeed);
                 positions[iz] = THREE.MathUtils.lerp(positions[iz], tz, lerpSpeed);
@@ -177,8 +177,8 @@ export default function ParticleSystem() {
             // Ensure "Center" gaze actually points the eye at the camera (0,0,0 rotation).
             // We dampen rotation so the eye doesn't spin away from the user.
             // Subtle tilt based on gaze.
-            pointsRef.current.rotation.y = THREE.MathUtils.lerp(pointsRef.current.rotation.y, position.x * 0.2, 0.1);
-            pointsRef.current.rotation.x = THREE.MathUtils.lerp(pointsRef.current.rotation.x, -position.y * 0.2, 0.1);
+            pointsRef.current.rotation.y = THREE.MathUtils.lerp(pointsRef.current.rotation.y, position.x * 0.2, 0.04); // Smoother
+            pointsRef.current.rotation.x = THREE.MathUtils.lerp(pointsRef.current.rotation.x, -position.y * 0.2, 0.04); // Smoother
             pointsRef.current.rotation.z = 0; // Ensure no roll
 
         } else if (currentShape === 'neural') {
