@@ -1,7 +1,7 @@
 import React from 'react';
 import Scene from './components/Scene';
 import HandTracker from './components/HandTracker';
-import Overlay from './components/UI/Overlay';
+import Overlay from './components/ui/Overlay';
 import { GestureProvider } from './context/GestureContext';
 
 function App() {
