@@ -4,6 +4,7 @@ import { OrbitControls } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import ParticleSystem from './ParticleSystem';
 import Earth from './Earth';
+import CyberCrystal from './CyberCrystal';
 import GameManager from './Game/GameManager';
 import { useGesture } from '../context/GestureContext';
 
@@ -12,7 +13,9 @@ function SceneContent() {
 
     return (
         <>
-            {currentShape === 'earth' ? <Earth /> : <ParticleSystem />}
+            {currentShape === 'earth' ? <Earth /> : 
+             currentShape === 'crystal' ? <CyberCrystal /> : 
+             <ParticleSystem />}
             
             {currentShape === 'game' && <GameManager />}
 
