@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useGesture } from '../../context/GestureContext';
-import { Heart, Flower, Globe, Zap, User, Sparkles, Hand, Move, Maximize2, PanelLeftClose, PanelLeft } from 'lucide-react';
+import { Heart, Flower, Globe, Zap, User, Sparkles, Hand, Move, Maximize2, PanelLeftClose, PanelLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
@@ -32,91 +31,107 @@ export default function Overlay() {
     const [panelOpen, setPanelOpen] = useState(true);
 
     return (
-        <div className="absolute inset-0 pointer-events-none z-10 p-4">
+        <div className="absolute inset-0 pointer-events-none z-10 p-6 overflow-hidden">
 
             {/* Toggle Button - Always Visible */}
             <Button
-                variant="outline"
+                variant="ghost"
                 size="icon"
                 onClick={() => setPanelOpen(!panelOpen)}
                 className={cn(
-                    "pointer-events-auto fixed top-4 z-20 transition-all duration-300 bg-background/80 backdrop-blur-xl border-border/50",
-                    panelOpen ? "left-[21rem]" : "left-4"
+                    "pointer-events-auto fixed top-6 z-50 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]",
+                    "h-10 w-10 rounded-full bg-black/20 hover:bg-black/40 text-white backdrop-blur-md border border-white/10 shadow-lg",
+                    panelOpen ? "left-[20.5rem]" : "left-6"
                 )}
             >
-                {panelOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
+                {panelOpen ? <PanelLeftClose className="h-5 w-5 opacity-70" /> : <PanelLeft className="h-5 w-5 opacity-70" />}
             </Button>
 
             {/* Left Side Panel */}
             <div
                 className={cn(
-                    "pointer-events-auto fixed left-4 top-4 bottom-4 w-80 transition-all duration-300 ease-out",
-                    panelOpen ? "translate-x-0 opacity-100" : "-translate-x-[110%] opacity-0"
+                    "pointer-events-auto fixed left-6 top-6 bottom-6 w-80 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]",
+                    panelOpen ? "translate-x-0 opacity-100 scale-100" : "-translate-x-[120%] opacity-0 scale-95"
                 )}
             >
-                <Card className="h-full bg-background/80 backdrop-blur-xl border-border/50 flex flex-col">
-
+                <div className="h-full flex flex-col rounded-[2rem] bg-black/40 backdrop-blur-2xl border border-white/10 shadow-2xl shadow-black/50 overflow-hidden ring-1 ring-white/5">
+                    
                     {/* Header */}
-                    <CardHeader className="pb-4">
-                        <div className="flex items-center justify-between">
-                            <CardTitle className="text-xl">Particle Morph</CardTitle>
+                    <div className="p-6 pb-2 border-b border-white/5">
+                        <div className="flex items-center justify-between mb-1">
+                            <h1 className="text-xl font-medium tracking-tight text-white/90">Particle Morph</h1>
                             <div className={cn(
-                                "w-2.5 h-2.5 rounded-full transition-colors",
-                                gestureState.isHandDetected ? "bg-green-500" : "bg-muted-foreground/30"
+                                "w-2 h-2 rounded-full shadow-[0_0_10px_rgba(0,0,0,0.5)] transition-all duration-500",
+                                gestureState.isHandDetected ? "bg-emerald-400 shadow-emerald-400/50" : "bg-white/10"
                             )} />
                         </div>
-                        <CardDescription>
-                            {gestureState.isHandDetected ? 'Hand tracking active' : 'Show your hand to camera'}
-                        </CardDescription>
-                    </CardHeader>
+                        <p className="text-sm font-medium text-white/40 tracking-wide">
+                            {gestureState.isHandDetected ? 'Active Control' : 'Waiting for Hand'}
+                        </p>
+                    </div>
 
-                    <CardContent className="flex-1 flex flex-col gap-6 overflow-y-auto">
+                    <div className="flex-1 flex flex-col gap-6 p-6 overflow-y-auto custom-scrollbar">
 
                         {/* Gestures Section */}
-                        <div className="space-y-3">
-                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Gestures</p>
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">Gestures</span>
+                                <div className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent"></div>
+                            </div>
 
-                            <div className="grid gap-2">
-                                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center shadow-lg">
-                                        <Maximize2 className="h-5 w-5 text-white" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="text-sm font-medium">Close Hand</p>
-                                        <p className="text-xs text-muted-foreground">Make a fist to expand particles</p>
+                            <div className="grid gap-3">
+                                <div className="group relative overflow-hidden rounded-2xl bg-white/5 p-4 transition-all hover:bg-white/10 border border-white/5">
+                                    <div className="absolute inset-0 bg-gradient-to-br from-rose-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    <div className="flex items-center gap-4 relative z-10">
+                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500/80 to-rose-600/80 flex items-center justify-center shadow-lg shadow-rose-500/20 text-white">
+                                            <Maximize2 className="h-5 w-5" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-sm font-medium text-white/90">Close Hand</p>
+                                            <p className="text-xs text-white/40">Fist expands particles</p>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
-                                        <Move className="h-5 w-5 text-white" />
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="text-sm font-medium">Move Hand</p>
-                                        <p className="text-xs text-muted-foreground">Hand position controls rotation</p>
+                                <div className="group relative overflow-hidden rounded-2xl bg-white/5 p-4 transition-all hover:bg-white/10 border border-white/5">
+                                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    <div className="flex items-center gap-4 relative z-10">
+                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500/80 to-indigo-600/80 flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white">
+                                            <Move className="h-5 w-5" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-sm font-medium text-white/90">Move Hand</p>
+                                            <p className="text-xs text-white/40">Controls rotation</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Tension Indicator */}
-                            <div className={cn("space-y-2 transition-opacity", gestureState.isHandDetected ? "opacity-100" : "opacity-40")}>
-                                <div className="flex items-center justify-between">
-                                    <span className="text-xs text-muted-foreground">Intensity</span>
-                                    <span className="text-xs font-mono text-muted-foreground">{Math.round(gestureState.tension * 100)}%</span>
+                            <div className={cn(
+                                "p-4 rounded-2xl bg-white/5 border border-white/5 transition-all duration-500",
+                                gestureState.isHandDetected ? "opacity-100" : "opacity-30 blur-[1px]"
+                            )}>
+                                <div className="flex items-center justify-between mb-3">
+                                    <span className="text-xs font-medium text-white/50">Fist Tension</span>
+                                    <span className="text-xs font-mono text-emerald-400 bg-emerald-400/10 px-1.5 py-0.5 rounded">{Math.round(gestureState.tension * 100)}%</span>
                                 </div>
-                                <Slider
-                                    value={[gestureState.tension * 100]}
-                                    max={100}
-                                    step={1}
-                                    disabled
-                                    className="cursor-default"
-                                />
+                                <div className="relative h-1.5 w-full bg-black/40 rounded-full overflow-hidden">
+                                    <div 
+                                        className="absolute top-0 left-0 h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-100 ease-out shadow-[0_0_10px_rgba(16,185,129,0.5)]"
+                                        style={{ width: `${gestureState.tension * 100}%` }}
+                                    />
+                                </div>
                             </div>
                         </div>
 
                         {/* Shapes Section */}
-                        <div className="space-y-3">
-                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Shape</p>
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">Shape</span>
+                                <div className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent"></div>
+                            </div>
+                            
                             <ToggleGroup
                                 type="single"
                                 value={currentShape}
@@ -125,15 +140,21 @@ export default function Overlay() {
                             >
                                 {SHAPES.map((shape) => {
                                     const Icon = shape.icon;
+                                    const isActive = currentShape === shape.id;
                                     return (
                                         <ToggleGroupItem
                                             key={shape.id}
                                             value={shape.id}
                                             aria-label={shape.label}
-                                            className="flex flex-col items-center justify-center h-auto py-3 px-2 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                                            className={cn(
+                                                "flex flex-col items-center justify-center h-20 rounded-2xl border transition-all duration-300",
+                                                isActive 
+                                                    ? "bg-white/15 border-white/20 text-white shadow-[0_0_15px_rgba(255,255,255,0.1)] scale-[1.02]" 
+                                                    : "bg-white/5 border-transparent text-white/40 hover:bg-white/10 hover:text-white/70"
+                                            )}
                                         >
-                                            <Icon className="h-5 w-5 mb-1" />
-                                            <span className="text-[10px] font-medium">{shape.label}</span>
+                                            <Icon className={cn("h-5 w-5 mb-2 transition-transform duration-300", isActive && "scale-110")} />
+                                            <span className="text-[9px] font-medium tracking-wide uppercase">{shape.label}</span>
                                         </ToggleGroupItem>
                                     );
                                 })}
@@ -141,27 +162,45 @@ export default function Overlay() {
                         </div>
 
                         {/* Colors Section */}
-                        <div className="space-y-3">
-                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Color</p>
-                            <div className="flex flex-wrap gap-2">
-                                {COLORS.map((color) => (
-                                    <button
-                                        key={color.hex}
-                                        onClick={() => setParticleColor(color.hex)}
-                                        className={cn(
-                                            "w-10 h-10 rounded-full transition-all duration-200 hover:scale-105 active:scale-95",
-                                            particleColor === color.hex && "ring-2 ring-ring ring-offset-2 ring-offset-background scale-110"
-                                        )}
-                                        style={{
-                                            backgroundColor: color.hex,
-                                            boxShadow: `0 4px 14px ${color.hex}50`
-                                        }}
-                                        title={color.name}
-                                    />
-                                ))}
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">Color</span>
+                                <div className="h-px flex-1 bg-gradient-to-r from-white/10 to-transparent"></div>
+                            </div>
+                            
+                            <div className="grid grid-cols-4 gap-3">
+                                {COLORS.map((color) => {
+                                    const isSelected = particleColor === color.hex;
+                                    return (
+                                        <button
+                                            key={color.hex}
+                                            onClick={() => setParticleColor(color.hex)}
+                                            className={cn(
+                                                "aspect-square rounded-2xl transition-all duration-300 relative group",
+                                                isSelected ? "scale-110 ring-2 ring-white/50 ring-offset-2 ring-offset-transparent" : "hover:scale-105 opacity-80 hover:opacity-100"
+                                            )}
+                                        >
+                                            <div 
+                                                className="absolute inset-0 rounded-2xl opacity-40 blur-sm transition-opacity group-hover:opacity-70"
+                                                style={{ backgroundColor: color.hex }}
+                                            />
+                                            <div 
+                                                className="absolute inset-[2px] rounded-xl border border-white/10"
+                                                style={{ backgroundColor: color.hex }}
+                                            />
+                                            {isSelected && (
+                                                <div className="absolute inset-0 flex items-center justify-center">
+                                                    <div className="w-1.5 h-1.5 bg-white rounded-full shadow-sm" />
+                                                </div>
+                                            )}
+                                        </button>
+                                    );
+                                })}
 
                                 {/* Custom Color */}
-                                <div className="relative w-10 h-10 rounded-full overflow-hidden bg-gradient-conic from-red-500 via-yellow-500 via-green-500 via-blue-500 to-red-500 hover:scale-105 active:scale-95 transition-transform">
+                                <div className="relative aspect-square rounded-2xl overflow-hidden group transition-transform hover:scale-105 active:scale-95">
+                                    <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent border border-white/10 rounded-2xl" />
+                                    <div className="absolute inset-[3px] rounded-xl bg-gradient-conic from-red-500 via-yellow-500 via-green-500 via-blue-500 to-red-500 opacity-80 group-hover:opacity-100 transition-opacity" />
                                     <input
                                         type="color"
                                         value={particleColor}
@@ -172,19 +211,8 @@ export default function Overlay() {
                                 </div>
                             </div>
                         </div>
-
-                        {/* Footer */}
-                        <div className="mt-auto pt-4 border-t border-border/50">
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                                <Hand className="h-3.5 w-3.5" />
-                                <span className="text-xs">
-                                    {gestureState.isHandDetected ? 'Tracking your hand...' : 'Waiting for hand detection'}
-                                </span>
-                            </div>
-                        </div>
-
-                    </CardContent>
-                </Card>
+                    </div>
+                </div>
             </div>
 
         </div>
