@@ -5,6 +5,7 @@ import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import ParticleSystem from './ParticleSystem';
 import Earth from './Earth';
 import CyberCrystal from './CyberCrystal';
+import Ferrofluid from './Ferrofluid';
 import GameManager from './Game/GameManager';
 import { useGesture } from '../context/GestureContext';
 
@@ -15,6 +16,7 @@ function SceneContent() {
         <>
             {currentShape === 'earth' ? <Earth /> : 
              currentShape === 'crystal' ? <CyberCrystal /> : 
+             currentShape === 'ferrofluid' ? <Ferrofluid /> :
              <ParticleSystem />}
             
             {currentShape === 'game' && <GameManager />}

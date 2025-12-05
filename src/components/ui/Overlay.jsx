@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useGesture } from '../../context/GestureContext';
-import { Heart, Flower, Globe, Zap, User, Sparkles, Hand, Move, Maximize2, PanelLeftClose, PanelLeft, Play, Eye, Brain, Gem } from 'lucide-react';
+import { Heart, Flower, Globe, Zap, User, Sparkles, Hand, Move, Maximize2, PanelLeftClose, PanelLeft, Play, Eye, Brain, Gem, Droplet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
@@ -10,6 +10,7 @@ const SHAPES = [
     { id: 'eye', icon: Eye, label: 'Cyber Eye' },
     { id: 'neural', icon: Brain, label: 'Neural' },
     { id: 'crystal', icon: Gem, label: 'Crystal' },
+    { id: 'ferrofluid', icon: Droplet, label: 'Venom' },
     { id: 'earth', icon: Globe, label: 'Earth' },
     { id: 'heart', icon: Heart, label: 'Heart' },
     { id: 'flower', icon: Flower, label: 'Flower' },
