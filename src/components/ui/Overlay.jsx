@@ -30,7 +30,7 @@ export default function Overlay() {
     const [panelOpen, setPanelOpen] = useState(true);
 
     return (
-        <div className="absolute inset-0 pointer-events-none z-10 p-6 overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none z-10 p-6 overflow-hidden font-sans">
 
             {/* Toggle Button */}
             <Button
@@ -54,59 +54,58 @@ export default function Overlay() {
                 )}
             >
                 {/* Main Glass Container */}
-                <div className="h-full flex flex-col rounded-[2.5rem] bg-[#050505]/80 backdrop-blur-3xl border border-white/5 shadow-2xl shadow-black/80 overflow-hidden ring-1 ring-white/5">
+                <div className="h-full flex flex-col rounded-[2rem] bg-[#050505]/80 backdrop-blur-3xl border border-white/5 shadow-2xl shadow-black/80 overflow-hidden ring-1 ring-white/5">
                     
                     {/* Top Gradient Glow Line */}
                     <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-50" />
 
                     {/* Header */}
-                    <div className="p-8 pb-4 relative">
+                    <div className="p-6 pb-4 relative border-b border-white/5">
                         <div className="flex items-center justify-between mb-2">
-                            <h1 className="text-lg font-semibold tracking-tight text-white">Particle Morph</h1>
+                            <h1 className="text-xl font-light tracking-wide text-white">Particle Morph</h1>
                             <div className={cn(
                                 "w-2 h-2 rounded-full shadow-[0_0_8px_currentColor] transition-all duration-500",
                                 gestureState.isHandDetected ? "bg-cyan-400 text-cyan-400" : "bg-white/20 text-white/20"
                             )} />
                         </div>
-                        <p className="text-xs font-medium text-white/40 tracking-wide uppercase">
+                        <p className="text-xs font-medium text-white/40 tracking-widest uppercase">
                             {gestureState.isHandDetected ? 'System Active' : 'System Idle'}
                         </p>
                     </div>
 
-                    <div className="flex-1 flex flex-col gap-8 p-8 pt-2 overflow-y-auto custom-scrollbar">
+                    <div className="flex-1 flex flex-col gap-8 p-6 pt-6 overflow-y-auto custom-scrollbar">
 
                         {/* Gestures Section */}
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-3 mb-4">
-                                <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">Control</span>
-                                <div className="h-px flex-1 bg-gradient-to-r from-white/5 to-transparent"></div>
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-3 mb-2">
+                                <span className="text-[11px] font-semibold text-white/50 uppercase tracking-widest">Controls</span>
                             </div>
 
                             <div className="grid gap-3">
                                 {/* Gesture Card 1 */}
-                                <div className="group relative overflow-hidden rounded-[1.5rem] bg-[#0a0a0a] p-5 transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,100,255,0.15)] border border-white/5">
+                                <div className="group relative overflow-hidden rounded-xl bg-[#0a0a0a] p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,100,255,0.15)] border border-white/5">
                                     <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                     <div className="flex items-center gap-4 relative z-10">
-                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600/20 to-blue-800/20 border border-blue-500/20 flex items-center justify-center text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+                                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-600/20 to-blue-800/20 border border-blue-500/20 flex items-center justify-center text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.2)]">
                                             <Maximize2 className="h-4 w-4" />
                                         </div>
                                         <div className="flex-1">
                                             <p className="text-sm font-medium text-white/90">Expansion</p>
-                                            <p className="text-[10px] text-white/40 mt-0.5">Clench fist to expand</p>
+                                            <p className="text-[11px] text-white/40 mt-0.5">Clench fist to expand</p>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Gesture Card 2 */}
-                                <div className="group relative overflow-hidden rounded-[1.5rem] bg-[#0a0a0a] p-5 transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,100,255,0.15)] border border-white/5">
+                                <div className="group relative overflow-hidden rounded-xl bg-[#0a0a0a] p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,100,255,0.15)] border border-white/5">
                                     <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                     <div className="flex items-center gap-4 relative z-10">
-                                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600/20 to-purple-800/20 border border-purple-500/20 flex items-center justify-center text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
+                                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-600/20 to-purple-800/20 border border-purple-500/20 flex items-center justify-center text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.2)]">
                                             <Move className="h-4 w-4" />
                                         </div>
                                         <div className="flex-1">
                                             <p className="text-sm font-medium text-white/90">Rotation</p>
-                                            <p className="text-[10px] text-white/40 mt-0.5">Move hand to rotate</p>
+                                            <p className="text-[11px] text-white/40 mt-0.5">Move hand to rotate</p>
                                         </div>
                                     </div>
                                 </div>
@@ -114,10 +113,10 @@ export default function Overlay() {
 
                             {/* Tension Bar */}
                             <div className={cn(
-                                "mt-2 p-4 rounded-[1.25rem] bg-[#0a0a0a] border border-white/5 transition-all duration-500 relative overflow-hidden",
+                                "mt-2 p-4 rounded-xl bg-[#0a0a0a] border border-white/5 transition-all duration-500 relative overflow-hidden",
                                 gestureState.isHandDetected ? "opacity-100" : "opacity-40 grayscale"
                             )}>
-                                <div className="flex items-center justify-between mb-3 relative z-10">
+                                <div className="flex items-center justify-between mb-2 relative z-10">
                                     <span className="text-[10px] font-medium text-white/40 uppercase tracking-wider">Force</span>
                                     <span className="text-[10px] font-mono text-cyan-400">{Math.round(gestureState.tension * 100)}%</span>
                                 </div>
@@ -127,19 +126,13 @@ export default function Overlay() {
                                         style={{ width: `${gestureState.tension * 100}%` }}
                                     />
                                 </div>
-                                {/* Subtle background glow behind the card based on tension */}
-                                <div 
-                                    className="absolute inset-0 bg-cyan-500/5 blur-xl transition-opacity duration-300"
-                                    style={{ opacity: gestureState.tension * 0.5 }}
-                                />
                             </div>
                         </div>
 
                         {/* Shapes Section */}
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-3 mb-4">
-                                <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">Geometry</span>
-                                <div className="h-px flex-1 bg-gradient-to-r from-white/5 to-transparent"></div>
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-3 mb-2">
+                                <span className="text-[11px] font-semibold text-white/50 uppercase tracking-widest">Shapes</span>
                             </div>
                             
                             <ToggleGroup
@@ -157,16 +150,16 @@ export default function Overlay() {
                                             value={shape.id}
                                             aria-label={shape.label}
                                             className={cn(
-                                                "flex-grow basis-[30%] h-16 rounded-2xl border transition-all duration-500 relative overflow-hidden group",
+                                                "flex-grow basis-[30%] h-14 rounded-xl border transition-all duration-500 relative overflow-hidden group",
                                                 isActive 
                                                     ? "bg-white/[0.03] border-cyan-500/30 text-cyan-50 shadow-[0_0_20px_rgba(0,200,255,0.15)]" 
                                                     : "bg-[#0a0a0a] border-white/5 text-white/30 hover:border-white/10 hover:text-white/60"
                                             )}
                                         >
                                             {isActive && <div className="absolute inset-0 bg-cyan-500/10 blur-md" />}
-                                            <div className="relative z-10 flex flex-col items-center justify-center gap-1.5">
+                                            <div className="relative z-10 flex flex-col items-center justify-center gap-1">
                                                 <Icon className={cn("h-4 w-4 transition-transform duration-500", isActive && "scale-110 text-cyan-300 drop-shadow-[0_0_8px_rgba(103,232,249,0.5)]")} />
-                                                <span className="text-[8px] font-medium tracking-wider uppercase">{shape.label}</span>
+                                                <span className="text-[9px] font-medium tracking-wider uppercase">{shape.label}</span>
                                             </div>
                                         </ToggleGroupItem>
                                     );
@@ -175,10 +168,9 @@ export default function Overlay() {
                         </div>
 
                         {/* Colors Section */}
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-3 mb-4">
-                                <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">Chromatics</span>
-                                <div className="h-px flex-1 bg-gradient-to-r from-white/5 to-transparent"></div>
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-3 mb-2">
+                                <span className="text-[11px] font-semibold text-white/50 uppercase tracking-widest">Colors</span>
                             </div>
                             
                             <div className="grid grid-cols-4 gap-3">
@@ -193,20 +185,15 @@ export default function Overlay() {
                                                 isSelected ? "scale-100" : "scale-90 opacity-60 hover:opacity-100 hover:scale-95"
                                             )}
                                         >
-                                            {isSelected && (
-                                                <div 
-                                                    className="absolute -inset-2 rounded-full opacity-40 blur-md transition-all duration-500"
-                                                    style={{ backgroundColor: color.hex }}
-                                                />
-                                            )}
                                             <div 
                                                 className="absolute inset-0 rounded-full border border-white/10 bg-[#0a0a0a] flex items-center justify-center overflow-hidden"
                                             >
                                                 <div 
-                                                    className="w-3 h-3 rounded-full shadow-sm"
+                                                    className="w-4 h-4 rounded-full shadow-sm transition-all duration-500"
                                                     style={{ 
                                                         backgroundColor: color.hex,
-                                                        boxShadow: `0 0 10px ${color.hex}`
+                                                        boxShadow: isSelected ? `0 0 15px ${color.hex}` : 'none',
+                                                        transform: isSelected ? 'scale(1.2)' : 'scale(1)'
                                                     }}
                                                 />
                                             </div>
@@ -220,7 +207,7 @@ export default function Overlay() {
                                 {/* Custom Color */}
                                 <div className="relative aspect-square rounded-full overflow-hidden group transition-transform hover:scale-95 scale-90 opacity-60 hover:opacity-100">
                                     <div className="absolute inset-0 bg-[#0a0a0a] border border-white/10 rounded-full flex items-center justify-center">
-                                        <div className="w-3 h-3 rounded-full bg-gradient-to-tr from-red-500 via-green-500 to-blue-500 opacity-80" />
+                                        <div className="w-4 h-4 rounded-full bg-gradient-to-tr from-red-500 via-green-500 to-blue-500 opacity-80" />
                                     </div>
                                     <input
                                         type="color"
