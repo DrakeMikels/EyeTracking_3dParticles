@@ -161,10 +161,10 @@ export default function Overlay() {
                                                 isGame && !isActive && "hover:border-purple-500/30 hover:text-purple-300 hover:shadow-[0_0_15px_rgba(255,0,255,0.15)]"
                                             )}
                                         >
-                                            {isActive && <div className={cn("absolute inset-0 blur-md", isGame ? "bg-purple-500/20" : "bg-cyan-500/10")} />}
                                             {isGame && (
-                                                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-fuchsia-500/20 to-cyan-500/20 opacity-50 blur-md group-hover:opacity-100 transition-opacity duration-500" />
                                             )}
+                                            {isActive && <div className={cn("absolute inset-0 blur-md", isGame ? "bg-purple-500/30" : "bg-cyan-500/10")} />}
                                             <div className="relative z-10 flex flex-col items-center justify-center gap-1">
                                                 <Icon className={cn(
                                                     "h-4 w-4 transition-transform duration-500", 
