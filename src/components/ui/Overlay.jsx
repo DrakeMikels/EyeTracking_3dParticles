@@ -27,8 +27,17 @@ const COLORS = [
 ];
 
 export default function Overlay() {
-    const { currentShape, setCurrentShape, particleColor, setParticleColor, gestureState } = useGesture();
+    const { currentShape, setCurrentShape, particleColor, setParticleColor, gestureState, resetGame } = useGesture();
     const [panelOpen, setPanelOpen] = useState(true);
+
+    const handleShapeChange = (val) => {
+        if (!val) return;
+        if (val === 'game') {
+            // Reset game state when entering game mode
+            resetGame();
+        }
+        setCurrentShape(val);
+    };
 
     return (
         <div className="absolute inset-0 pointer-events-none z-10 p-6 overflow-hidden font-sans">
@@ -139,7 +148,7 @@ export default function Overlay() {
                             <ToggleGroup
                                 type="single"
                                 value={currentShape}
-                                onValueChange={(val) => val && setCurrentShape(val)}
+                                onValueChange={handleShapeChange}
                                 className="flex flex-wrap gap-2"
                             >
                                 {SHAPES.map((shape) => {

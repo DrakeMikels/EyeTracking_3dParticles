@@ -10,12 +10,25 @@ export function GestureProvider({ children }) {
     });
     const [currentShape, setCurrentShape] = useState('sphere');
     const [particleColor, setParticleColor] = useState('#ff0066');
+    const [gameState, setGameState] = useState({
+        isPlaying: false,
+        score: 0,
+        highScore: 0,
+        gameMode: 'intro', // 'intro', 'playing', 'gameover'
+    });
+
+    // Helper to reset game state
+    const resetGame = () => {
+        setGameState(prev => ({ ...prev, gameMode: 'intro', isPlaying: false, score: 0 }));
+    };
 
     return (
         <GestureContext.Provider value={{
             gestureState, setGestureState,
             currentShape, setCurrentShape,
-            particleColor, setParticleColor
+            particleColor, setParticleColor,
+            gameState, setGameState,
+            resetGame
         }}>
             {children}
         </GestureContext.Provider>
