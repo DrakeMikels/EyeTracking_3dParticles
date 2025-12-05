@@ -80,8 +80,8 @@ export default function ParticleSystem() {
         // Rotation based on hand position (X axis -> Y rotation, Y axis -> X rotation)
         // In game mode, we don't rotate the whole system, we move the cluster
         if (currentShape !== 'game') {
-            pointsRef.current.rotation.y = THREE.MathUtils.lerp(pointsRef.current.rotation.y, position.x * 2, 0.1);
-            pointsRef.current.rotation.x = THREE.MathUtils.lerp(pointsRef.current.rotation.x, -position.y * 2, 0.1);
+            pointsRef.current.rotation.y = THREE.MathUtils.lerp(pointsRef.current.rotation.y, position.x * 2.3, 0.1);
+            pointsRef.current.rotation.x = THREE.MathUtils.lerp(pointsRef.current.rotation.x, -position.y * 2.3, 0.1);
         } else {
             // Game Mode: Reset rotation
             pointsRef.current.rotation.y = THREE.MathUtils.lerp(pointsRef.current.rotation.y, 0, 0.1);
@@ -158,8 +158,8 @@ export default function ParticleSystem() {
                     // In Three.js default camera, +Y is UP, +X is RIGHT.
                     // gestureState.position is -1 (left/bottom) to 1 (right/top)
                     // So gazeX needs to match coordinate system.
-                    const gazeX = position.x * 1.5; 
-                    const gazeY = position.y * 1.5;
+                    const gazeX = position.x * 1.75; 
+                    const gazeY = position.y * 1.75;
                     
                     tx += gazeX;
                     ty += gazeY;

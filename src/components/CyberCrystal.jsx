@@ -16,8 +16,8 @@ export default function CyberCrystal() {
         
         // 1. Rotation based on Head Movement
         // Smooth lerp for fluid feel
-        meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, position.x * 2 + state.clock.elapsedTime * 0.2, 0.05);
-        meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, -position.y * 2 + state.clock.elapsedTime * 0.1, 0.05);
+        meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, position.x * 2.3 + state.clock.elapsedTime * 0.2, 0.05);
+        meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, -position.y * 2.3 + state.clock.elapsedTime * 0.1, 0.05);
 
         // 2. Distortion/Pulse based on Tension (Squint)
         // Base distort: 0.3
