@@ -146,7 +146,7 @@ export default function EyeTracker() {
   };
 
   return (
-    <div className="absolute top-4 right-4 w-48 h-36 bg-black/50 rounded-lg overflow-hidden border border-white/10 z-50">
+    <div className="absolute bottom-4 right-4 w-28 h-20 sm:w-48 sm:h-36 bg-black/50 rounded-lg overflow-hidden border border-white/10 z-50 transition-all duration-300">
        <video 
          ref={videoRef}
          autoPlay 
@@ -155,8 +155,8 @@ export default function EyeTracker() {
          className="w-full h-full object-cover opacity-50 transform scale-x-[-1]" 
        />
        {/* Debug Overlay */}
-       <div className="absolute bottom-2 left-2 text-[10px] text-white/70 font-mono">
-         EYE TRACKING ACTIVE
+       <div className="absolute bottom-1 left-2 text-[8px] sm:text-[10px] text-white/70 font-mono">
+         EYE TRACKING
        </div>
     </div>
   );
