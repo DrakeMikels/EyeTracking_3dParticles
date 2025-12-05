@@ -259,6 +259,22 @@ export default function ParticleSystem() {
         }
 
         pointsRef.current.geometry.attributes.position.needsUpdate = true;
+
+        // Dynamic Color Logic based on Squint/Tension
+        if (pointsRef.current.material) {
+            const baseColor = new THREE.Color(particleColor);
+            // Target color for high tension (squinting) -> "Hot" Red/Orange
+            const tensionColor = new THREE.Color('#ff3300'); 
+
+            if (['sphere', 'neural', 'eye'].includes(currentShape)) {
+                // Smoothly lerp color based on tension (0.0 to 1.0)
+                // This creates the "gradual change" requested
+                const activeColor = baseColor.clone().lerp(tensionColor, gestureState.tension);
+                pointsRef.current.material.color.copy(activeColor);
+            } else {
+                pointsRef.current.material.color.copy(baseColor);
+            }
+        }
     });
 
     return (
@@ -273,7 +289,7 @@ export default function ParticleSystem() {
             </bufferGeometry>
             <pointsMaterial
                 size={0.015}
-                color={currentShape === 'eye' && gestureState.tension > 0.5 ? "#ff0000" : particleColor} // Dynamic color for Eye
+                color={particleColor} // Base color, overridden by useFrame for tension
                 sizeAttenuation={true}
                 depthWrite={false}
                 blending={THREE.AdditiveBlending}
