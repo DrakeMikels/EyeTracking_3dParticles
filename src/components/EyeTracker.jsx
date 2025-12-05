@@ -63,11 +63,11 @@ export default function EyeTracker() {
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         
-        // Wait for metadata to size the video element properly
-        videoRef.current.onloadedmetadata = () => {
+        // Use onloadeddata instead of onloadedmetadata for iOS Safari compatibility
+        // iOS sometimes fires loadedmetadata before video is actually ready to play
+        videoRef.current.onloadeddata = () => {
             videoRef.current.play().catch(e => console.error("Play error", e));
             
-            // CRITICAL: MediaPipe needs explicit width/height on the video element
             videoRef.current.width = videoRef.current.videoWidth;
             videoRef.current.height = videoRef.current.videoHeight;
             
