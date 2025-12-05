@@ -33,6 +33,7 @@ export default function Overlay() {
     const handleShapeChange = (val) => {
         if (!val) return;
         if (val === 'game') {
+            console.log("Entering Game Mode via Overlay button");
             // Reset game state when entering game mode
             resetGame();
         }

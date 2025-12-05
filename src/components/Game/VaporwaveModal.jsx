@@ -7,6 +7,8 @@ import { Play, Trophy, X, Skull } from 'lucide-react';
 export default function VaporwaveModal() {
     const { currentShape, gameState, setGameState, setCurrentShape } = useGesture();
 
+    console.log('VaporwaveModal Render Check:', { currentShape, gameMode: gameState.gameMode });
+
     // Only show modal if in game mode AND state is intro or gameover
     if (currentShape !== 'game') return null;
     if (gameState.gameMode === 'playing') return null;

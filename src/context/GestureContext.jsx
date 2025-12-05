@@ -19,6 +19,7 @@ export function GestureProvider({ children }) {
 
     // Helper to reset game state
     const resetGame = () => {
+        console.log("Resetting game state to Intro");
         setGameState(prev => ({ ...prev, gameMode: 'intro', isPlaying: false, score: 0 }));
     };
 
