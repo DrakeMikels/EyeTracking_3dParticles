@@ -162,7 +162,10 @@ export default function Overlay() {
                                             )}
                                         >
                                             {isGame && (
-                                                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-fuchsia-500/20 to-cyan-500/20 opacity-50 blur-md group-hover:opacity-100 transition-opacity duration-500" />
+                                                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-fuchsia-500/20 to-cyan-500/20 opacity-100 blur-md animate-pulse" />
+                                            )}
+                                            {isGame && (
+                                                <div className="absolute inset-0 rounded-xl ring-1 ring-purple-500/50 shadow-[0_0_10px_rgba(168,85,247,0.5)] animate-pulse" />
                                             )}
                                             {isActive && <div className={cn("absolute inset-0 blur-md", isGame ? "bg-purple-500/30" : "bg-cyan-500/10")} />}
                                             <div className="relative z-10 flex flex-col items-center justify-center gap-1">
