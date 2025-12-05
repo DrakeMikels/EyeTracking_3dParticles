@@ -7,15 +7,17 @@ import { Play, Trophy, X, Skull } from 'lucide-react';
 export default function VaporwaveModal() {
     const { currentShape, gameState, setGameState, setCurrentShape } = useGesture();
 
-    // If not in game mode OR if actually playing, hide modal
+    // Only show modal if in game mode AND state is intro or gameover
     if (currentShape !== 'game') return null;
     if (gameState.gameMode === 'playing') return null;
 
     const startGame = () => {
+        console.log('Starting Game...'); // Debug log
         setGameState(prev => ({ ...prev, gameMode: 'playing', score: 0 }));
     };
 
     const exitGame = () => {
+        console.log('Exiting Game...'); // Debug log
         setCurrentShape('sphere');
         setGameState(prev => ({ ...prev, gameMode: 'intro' }));
     };
